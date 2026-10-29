@@ -142,7 +142,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .btn.bad { background: var(--bad); color: var(--on-bad); }
 .btn.sun { background: var(--sun); color: var(--on-sun); }
 .btn.big { width: 100%; }
-
+.foot { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 20px; }
 .foot { display: flex; justify-content: center; }
 .foot .link { color: var(--muted); font-size: 0.9rem; }
 
@@ -286,7 +286,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 
       <button class="btn sun big" type="button" id="startBtn">C'est parti !</button>
       <p class="hint center" id="deckInfo"></p>
-      <div class="foot"><button class="link" type="button" id="resetBtn">Effacer mes progrès</button></div>
+      <div class="foot"><a class="link" href="imprimer.html">Cartes à imprimer</a><button class="link" type="button" id="resetBtn">Effacer mes progrès</button></div>
     </section>
 
     <!-- Cartes difficiles -->

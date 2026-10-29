@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cartes à imprimer · Tables en cartes</title>
+<meta name="theme-color" content="#EAF0FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1430" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+@font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('fonts/fredoka-latin.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-style: normal; font-weight: 200 1000; font-display: swap; src: url('fonts/nunito-latin.woff2') format('woff2'); }
+
+/* Écran : réglages sur une colonne. Impression : feuilles A4, recto puis verso. */
+:root {
+  --bg: #EAF0FF;
+  --surface: #FFFFFF;
+  --ink: #16204A;
+  --muted: #55608A;
+  --line: #16204A;
+  --accent: #2F5BFF;
+  --on-accent: #FFFFFF;
+  --sun: #FFC93C;
+  --on-sun: #16204A;
+  --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --dx: 0mm;
+  --dy: 0mm;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0F1430;
+    --surface: #1B2250;
+    --ink: #EEF1FF;
+    --muted: #A5AFD9;
+    --line: #EEF1FF;
+    --accent: #8AA2FF;
+    --on-accent: #0E1230;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.45; }
+button, input { font: inherit; color: inherit; touch-action: manipulation; }
+:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
+
+/* ---------- Écran ---------- */
+.screen {
+  max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;
+  padding-top: calc(22px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.back-link { color: var(--accent); font-weight: 800; text-underline-offset: 3px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.05; margin: 6px 0 0; text-wrap: balance; }
+.lead { margin: 8px 0 0; color: var(--muted); font-weight: 700; }
+.panel { background: var(--surface); border: 3px solid var(--line); border-radius: 22px; box-shadow: 0 6px 0 var(--line); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.panel h2 { font-family: var(--display); font-weight: 600; font-size: 1.25rem; margin: 0; }
+.panel p, .panel ol { margin: 0; }
+.panel ol { padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.hint { color: var(--muted); font-weight: 700; font-size: .9rem; }
+.step { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; margin-right: 6px; border-radius: 50%; background: var(--sun); color: var(--on-sun); font-size: .9em; }
+
+.chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); gap: 8px; }
+.chip { min-height: 48px; border: 3px solid var(--line); border-radius: 14px; background: var(--bg); font-family: var(--display); font-weight: 700; font-size: 1.3rem; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.quick { display: flex; gap: 6px 14px; flex-wrap: wrap; }
+.link { background: none; border: 0; padding: 4px 2px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; color: var(--accent); }
+
+.offsets { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.offset label { display: block; font-weight: 800; margin-bottom: 6px; }
+.offset small { display: block; color: var(--muted); font-weight: 700; }
+.stepper { display: flex; align-items: stretch; border: 3px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--bg); }
+.stepper button { flex: none; width: 44px; border: 0; background: var(--surface); font-family: var(--display); font-weight: 700; font-size: 1.4rem; cursor: pointer; }
+.stepper input { flex: 1; min-width: 0; width: 100%; border: 0; border-inline: 3px solid var(--line); background: var(--bg); text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.3rem; padding: 8px 4px; font-variant-numeric: tabular-nums; }
+
+.btn {
+  width: 100%; border: 3px solid var(--line); border-radius: 18px; padding: 14px 20px; min-height: 58px;
+  font-family: var(--display); font-weight: 600; font-size: 1.2rem; cursor: pointer; box-shadow: 0 5px 0 var(--line);
+  background: var(--surface); color: var(--ink);
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--line); }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.sun { background: var(--sun); color: var(--on-sun); }
+
+@media (max-width: 420px) { .offsets { grid-template-columns: 1fr; } }
+
+/* ---------- Feuilles ---------- */
+@page { size: A4 portrait; margin: 0; }
+.sheets { display: none; }
+
+@media print {
+  html, body { background: #fff; color: #111; }
+  .screen { display: none !important; }
+  .sheets { display: block; }
+  body[data-print="cards"] #testSheets,
+  body[data-print="test"] #cardSheets { display: none; }
+}
+
+.sheets { -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: var(--display); color: #111; }
+.sheet { position: relative; width: 210mm; height: 296mm; overflow: hidden; break-after: page; page-break-after: always; background: #fff; }
+.grid { width: 210mm; height: 297mm; padding: 16.5mm 7.5mm; display: grid; grid-template-columns: repeat(3, 65mm); grid-template-rows: repeat(3, 88mm); }
+/* Le verso est décalé du réglage mesuré avec la page de test. */
+.sheet.verso .grid, .sheet.verso .test { transform: translate(var(--dx), var(--dy)); }
+
+.card { position: relative; width: 65mm; height: 88mm; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.card.front { border: 0.3mm dashed #999; }
+.card.front .band { position: absolute; left: 0; right: 0; top: 0; height: 13mm; background: var(--c); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 4.4mm; }
+.card.front .q { font-weight: 700; font-size: 15mm; white-space: nowrap; margin-top: 5mm; }
+/* Verso sans bord ni bandeau : tout reste à plus de 8 mm du trait de coupe,
+   donc un petit décalage de l'imprimante ne se voit pas. */
+.card.back .small { font-weight: 600; font-size: 7mm; color: #666; white-space: nowrap; }
+.card.back .a { font-weight: 700; font-size: 27mm; line-height: 1.05; color: var(--c); }
+.card.back .pill { position: absolute; bottom: 11mm; left: 50%; transform: translateX(-50%); background: var(--c); color: #fff; border-radius: 99px; padding: 1.2mm 4mm; font-weight: 600; font-size: 3.8mm; white-space: nowrap; }
+
+/* Page de test */
+.test { position: absolute; inset: 0; }
+/* Textes dans la moitié gauche, à l'écart des lignes du centre. */
+.test .title { position: absolute; top: 14mm; left: 15mm; font-weight: 700; font-size: 7mm; }
+.test .note { position: absolute; left: 15mm; width: 82mm; bottom: 18mm; font-family: var(--body); font-size: 4mm; line-height: 1.45; color: #333; }
+.cross-h { position: absolute; left: 0; right: 0; top: 148.5mm; height: 0; border-top: 0.35mm solid #000; }
+.cross-v { position: absolute; top: 0; bottom: 0; left: 105mm; width: 0; border-left: 0.35mm solid #000; }
+.ruler { position: absolute; }
+.ruler svg { display: block; overflow: visible; }
+</style>
+</head>
+<body data-print="cards">
+
+<div class="screen">
+  <header>
+    <a class="back-link" href="./">← Retour au jeu</a>
+    <h1>Cartes à imprimer</h1>
+    <p class="lead">Questions au recto, réponses au verso, en A4 recto-verso. Un réglage corrige le décalage de ton imprimante.</p>
+  </header>
+
+  <div class="panel">
+    <h2>Quelles tables ?</h2>
+    <div class="chips" id="chips"></div>
+    <div class="quick">
+      <button class="link" type="button" id="allBtn">Toutes les tables</button>
+      <button class="link" type="button" id="noneBtn">Tout décocher</button>
+    </div>
+    <p class="hint" id="info"></p>
+  </div>
+
+  <div class="panel">
+    <h2><span class="step">1</span>Mesure le décalage</h2>
+    <ol>
+      <li>Imprime la page de test <b>en recto-verso, retournement sur le bord long</b>, à l'échelle <b>100 %</b> (ou « taille réelle », jamais « ajuster »).</li>
+      <li>Tiens la feuille contre une fenêtre, <b>la face « Verso » vers toi</b>. Les deux lignes du recto se voient par transparence.</li>
+      <li>Lis le nombre où la ligne verticale du recto traverse la règle horizontale, puis où la ligne horizontale traverse la règle verticale.</li>
+    </ol>
+    <button class="btn" type="button" id="printTest">Imprimer la page de test</button>
+  </div>
+
+  <div class="panel">
+    <h2><span class="step">2</span>Règle le décalage</h2>
+    <p>Ajoute les nombres lus au réglage actuel. Si tu réimprimes la page de test ensuite, les lignes doivent tomber sur 0.</p>
+    <div class="offsets">
+      <div class="offset">
+        <label for="dx">Horizontal (mm)<small>+ = vers la droite</small></label>
+        <div class="stepper">
+          <button type="button" data-step="dx:-0.5" aria-label="Diminuer le réglage horizontal">−</button>
+          <input id="dx" type="number" inputmode="decimal" step="0.5" min="-15" max="15">
+          <button type="button" data-step="dx:0.5" aria-label="Augmenter le réglage horizontal">+</button>
+        </div>
+      </div>
+      <div class="offset">
+        <label for="dy">Vertical (mm)<small>+ = vers le bas</small></label>
+        <div class="stepper">
+          <button type="button" data-step="dy:-0.5" aria-label="Diminuer le réglage vertical">−</button>
+          <input id="dy" type="number" inputmode="decimal" step="0.5" min="-15" max="15">
+          <button type="button" data-step="dy:0.5" aria-label="Augmenter le réglage vertical">+</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Le réglage est gardé sur cet appareil. Il ne déplace que le verso.</p>
+  </div>
+
+  <div class="panel">
+    <h2><span class="step">3</span>Imprime les cartes</h2>
+    <p>Mêmes réglages que pour la page de test : recto-verso, bord long, 100 %. Découpe ensuite le long des pointillés du recto.</p>
+    <button class="btn sun" type="button" id="printCards">Imprimer les cartes</button>
+  </div>
+</div>
+
+<div class="sheets" id="cardSheets"></div>
+<div class="sheets" id="testSheets"></div>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  var TABLES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  var COLORS = {
+    2: '#E5484D', 3: '#F76B15', 4: '#C98A00', 5: '#30A46C', 6: '#12A594', 7: '#0090FF',
+    8: '#6E56CF', 9: '#D6409F', 10: '#5B6472', 11: '#8E4EC6', 12: '#A18072'
+  };
+
+  var cfg = Object.assign({ tables: TABLES.slice(), dx: 0, dy: 0 }, store.get('tec-print', {}));
+  if (!Array.isArray(cfg.tables)) cfg.tables = TABLES.slice();
+  cfg.tables = cfg.tables.filter(function (t) { return TABLES.indexOf(t) >= 0; });
+  function save() { store.set('tec-print', cfg); }
+  function clamp(v) { v = Math.round((parseFloat(v) || 0) * 2) / 2; return Math.max(-15, Math.min(15, v)); }
+  cfg.dx = clamp(cfg.dx); cfg.dy = clamp(cfg.dy);
+
+  /* ---------- Cartes ---------- */
+  function buildCards() {
+    var html = '';
+    cfg.tables.forEach(function (t) {
+      var c = COLORS[t], facts = [];
+      for (var b = 2; b <= 10; b++) facts.push({ a: t, b: b });
+      var front = facts.map(function (f) {
+        return '<div class="card front" style="--c:' + c + '"><div class="band">Table de ' + t + '</div><div class="q">' + f.a + ' × ' + f.b + '</div></div>';
+      }).join('');
+      // Verso : colonnes inversées dans chaque rangée pour tomber derrière la bonne
+      // carte quand la feuille est retournée sur le bord long.
+      var back = [0, 1, 2].map(function (r) { return facts.slice(r * 3, r * 3 + 3).reverse(); })
+        .reduce(function (all, row) { return all.concat(row); }, [])
+        .map(function (f) {
+          return '<div class="card back" style="--c:' + c + '"><div class="small">' + f.a + ' × ' + f.b + ' =</div><div class="a">' + f.a * f.b + '</div><div class="pill">Table de ' + t + '</div></div>';
+        }).join('');
+      html += '<div class="sheet recto"><div class="grid">' + front + '</div></div>' +
+              '<div class="sheet verso"><div class="grid">' + back + '</div></div>';
+    });
+    $('#cardSheets').innerHTML = html;
+  }
+
+  /* ---------- Page de test ---------- */
+  // Règle en millimètres : 0 au centre, graduation tous les 1 mm, chiffres tous les 5 mm.
+  function ruler(vertical) {
+    var R = 15, L = R * 2, ticks = '', labels = '';
+    for (var i = -R; i <= R; i++) {
+      var len = i % 5 === 0 ? 8 : 4, p = i + R;
+      ticks += vertical
+        ? '<line x1="0" y1="' + p + '" x2="' + len + '" y2="' + p + '"/>'
+        : '<line x1="' + p + '" y1="0" x2="' + p + '" y2="' + len + '"/>';
+      if (i % 5 === 0) {
+        var label = i > 0 ? '+' + i : i < 0 ? '−' + -i : '0';
+        labels += vertical
+          ? '<text x="10" y="' + (p + 0.9) + '">' + label + '</text>'
+          : '<text x="' + p + '" y="12" text-anchor="middle">' + label + '</text>';
+      }
+    }
+    var w = vertical ? 22 : L, h = vertical ? L : 14;
+    return '<svg width="' + w + 'mm" height="' + h + 'mm" viewBox="0 0 ' + w + ' ' + h + '">' +
+      '<g stroke="#000" stroke-width="0.2">' + ticks + '</g>' +
+      '<g fill="#000" font-family="Fredoka, sans-serif" font-size="2.6" font-weight="600">' + labels + '</g></svg>';
+  }
+  function buildTest() {
+    var recto = '<div class="sheet recto"><div class="test">' +
+      '<div class="title">Page de test · RECTO</div>' +
+      '<div class="cross-h"></div><div class="cross-v"></div>' +
+      '<div class="note">Imprime cette page en recto-verso, retournement sur le bord long, à 100 %. Puis regarde le verso contre une fenêtre.</div>' +
+      '</div></div>';
+    // Règles placées hors du centre pour ne pas se chevaucher : la règle horizontale
+    // croise la ligne verticale du recto, la règle verticale croise sa ligne horizontale.
+    var verso = '<div class="sheet verso"><div class="test">' +
+      '<div class="title">Page de test · VERSO</div>' +
+      '<div class="ruler" style="left:90mm;top:70mm">' + ruler(false) + '</div>' +
+      '<div class="ruler" style="left:40mm;top:133.5mm">' + ruler(true) + '</div>' +
+      '<div class="note">Face « Verso » vers toi, contre une fenêtre : lis où la ligne verticale du recto coupe la règle du haut (réglage horizontal), et où la ligne horizontale coupe la règle de gauche (réglage vertical). Ajoute ces nombres au réglage de la page « Cartes à imprimer ».</div>' +
+      '</div></div>';
+    $('#testSheets').innerHTML = recto + verso;
+  }
+
+  /* ---------- Réglages ---------- */
+  function renderChips() {
+    var chips = $('#chips');
+    chips.innerHTML = '';
+    TABLES.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.t = t;
+      b.textContent = t;
+      b.setAttribute('aria-pressed', cfg.tables.indexOf(t) >= 0 ? 'true' : 'false');
+      b.setAttribute('aria-label', 'Table de ' + t);
+      chips.appendChild(b);
+    });
+    var n = cfg.tables.length;
+    $('#info').textContent = n
+      ? n * 9 + ' cartes, ' + n * 2 + ' pages (' + n + ' feuille' + (n > 1 ? 's' : '') + ' recto-verso)'
+      : 'Choisis au moins une table.';
+    $('#printCards').disabled = !n;
+  }
+  function renderOffsets() {
+    $('#dx').value = cfg.dx;
+    $('#dy').value = cfg.dy;
+    document.documentElement.style.setProperty('--dx', cfg.dx + 'mm');
+    document.documentElement.style.setProperty('--dy', cfg.dy + 'mm');
+  }
+  function setTables(list) {
+    cfg.tables = list.slice().sort(function (a, b) { return a - b; });
+    save(); renderChips(); buildCards();
+  }
+
+  $('#chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    var t = +b.dataset.t, list = cfg.tables.slice(), i = list.indexOf(t);
+    if (i >= 0) list.splice(i, 1); else list.push(t);
+    setTables(list);
+    var again = document.querySelector('.chip[data-t="' + t + '"]');
+    if (again) again.focus();
+  });
+  $('#allBtn').addEventListener('click', function () { setTables(TABLES); });
+  $('#noneBtn').addEventListener('click', function () { setTables([]); });
+  ['dx', 'dy'].forEach(function (id) {
+    $('#' + id).addEventListener('change', function (e) { cfg[id] = clamp(e.target.value); save(); renderOffsets(); });
+  });
+  document.querySelectorAll('[data-step]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var p = b.dataset.step.split(':');
+      cfg[p[0]] = clamp(cfg[p[0]] + parseFloat(p[1]));
+      save(); renderOffsets();
+    });
+  });
+
+  function printAs(kind) {
+    document.body.dataset.print = kind;
+    window.print();
+  }
+  $('#printTest').addEventListener('click', function () { printAs('test'); });
+  $('#printCards').addEventListener('click', function () { printAs('cards'); });
+  window.addEventListener('afterprint', function () { document.body.dataset.print = 'cards'; });
+
+  renderChips();
+  renderOffsets();
+  buildCards();
+  buildTest();
+})();
+</script>
+</body>
+</html>
