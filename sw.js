@@ -1,9 +1,10 @@
 // Garde le jeu disponible hors ligne.
 // Changer CACHE à chaque mise à jour des fichiers listés ci-dessous.
-var CACHE = 'tables-en-cartes-v2';
+var CACHE = 'tables-en-cartes-v3';
 var FILES = [
   './',
   './index.html',
+  './imprimer.html',
   './manifest.webmanifest',
   './fonts/fredoka-latin.woff2',
   './fonts/nunito-latin.woff2',
@@ -35,10 +36,12 @@ self.addEventListener('fetch', function (e) {
       fetch(req).then(function (res) {
         if (res.ok) {
           var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put('./index.html', copy); });
+          caches.open(CACHE).then(function (c) { c.put(req, copy); });
         }
         return res;
-      }).catch(function () { return caches.match('./index.html'); })
+      }).catch(function () {
+        return caches.match(req, { ignoreSearch: true }).then(function (hit) { return hit || caches.match('./index.html'); });
+      })
     );
     return;
   }

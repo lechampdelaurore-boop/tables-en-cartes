@@ -20,9 +20,22 @@ Flashcards pour apprendre les tables de multiplication de 2 à 12.
 
 Les progrès restent dans le navigateur de l'appareil : aucun compte, et rien n'est envoyé sur internet.
 
+## Cartes à imprimer
+
+Questions au recto, réponses au verso. Imprimer en A4 recto-verso, retournement sur le bord long, à l'échelle 100 %.
+
+Beaucoup d'imprimantes décalent le verso de quelques millimètres. La page `imprimer.html` corrige ce décalage :
+
+1. Imprimer la page de test, puis regarder le verso contre une fenêtre.
+2. Lire sur les deux règles où tombent les lignes du recto, et ajouter ces nombres au réglage.
+3. Imprimer les cartes.
+
+Le verso des cartes n'a ni bord ni bandeau près du trait de coupe : un petit décalage restant ne se voit pas.
+
 ## Fichiers
 
 - `index.html` : tout le jeu (HTML, CSS et JavaScript, sans bibliothèque).
 - `sw.js` et `manifest.webmanifest` : mode hors ligne et installation. Après une modification des fichiers du jeu, changer la valeur de `CACHE` dans `sw.js`.
 - `fonts/` : polices Fredoka et Nunito (licence SIL Open Font License, voir les fichiers `OFL-*.txt`).
-- `outils/cartes-pdf.js` : génère les cartes à imprimer.
+- `imprimer.html` : les cartes à imprimer. Le PDF en est une impression avec le réglage à 0.
+
