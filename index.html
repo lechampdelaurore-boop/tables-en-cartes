@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}</style>
+<title>Tables en cartes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: une colonne centrée, une grosse carte au milieu, boutons épais à pouce. */
+:root {
+  --bg: #EAF0FF;
+  --surface: #FFFFFF;
+  --ink: #16204A;
+  --muted: #55608A;
+  --line: #16204A;
+  --track: #D3DCF7;
+  --accent: #2F5BFF;
+  --on-accent: #FFFFFF;
+  --sun: #FFC93C;
+  --on-sun: #16204A;
+  --good: #2BC48A;
+  --on-good: #06291C;
+  --bad: #FF7A6B;
+  --on-bad: #3A0C07;
+  --tint-good: #D8F6E8;
+  --tint-bad: #FFE1DC;
+  --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1430;
+    --surface: #1B2250;
+    --ink: #EEF1FF;
+    --muted: #A5AFD9;
+    --line: #EEF1FF;
+    --track: #2A3370;
+    --accent: #8AA2FF;
+    --on-accent: #0E1230;
+    --good: #3DDC97;
+    --bad: #FF8A7E;
+    --tint-good: #1B4A3B;
+    --tint-bad: #58262A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1430;
+  --surface: #1B2250;
+  --ink: #EEF1FF;
+  --muted: #A5AFD9;
+  --line: #EEF1FF;
+  --track: #2A3370;
+  --accent: #8AA2FF;
+  --on-accent: #0E1230;
+  --good: #3DDC97;
+  --bad: #FF8A7E;
+  --tint-good: #1B4A3B;
+  --tint-bad: #58262A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.45;
+  padding-block: 22px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
+
+/* En-tête */
+.head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.head h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1; margin: 0; text-wrap: balance; }
+.head p { margin: 8px 0 0; color: var(--muted); font-weight: 700; max-width: 30ch; }
+.minis { position: relative; width: 108px; height: 92px; flex: none; }
+.mini {
+  position: absolute; width: 74px; height: 62px; display: grid; place-items: center;
+  background: var(--surface); border: 3px solid var(--line); border-radius: 14px;
+  box-shadow: 0 4px 0 var(--line); font-family: var(--display); font-weight: 700; font-size: 1.2rem;
+}
+.mini.m1 { left: 0; top: 14px; transform: rotate(-9deg); }
+.mini.m2 { right: 0; top: 0; transform: rotate(7deg); background: var(--sun); color: var(--on-sun); font-size: 1.7rem; }
+
+/* Panneaux */
+.panel { background: var(--surface); border: 3px solid var(--line); border-radius: 22px; box-shadow: 0 6px 0 var(--line); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.panel h2 { font-family: var(--display); font-weight: 600; font-size: 1.25rem; margin: 0; }
+.hint { color: var(--muted); font-weight: 700; font-size: 0.9rem; margin: 0; }
+
+.chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 10px; }
+.chip {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 9px;
+  background: var(--bg); border: 3px solid var(--line); border-radius: 16px; cursor: pointer;
+  box-shadow: 0 4px 0 var(--line); transition: transform .08s, box-shadow .08s, background .15s;
+}
+.chip .n { font-family: var(--display); font-weight: 700; font-size: 1.7rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.chip .m { width: 70%; height: 8px; background: var(--track); border-radius: 99px; overflow: hidden; }
+.chip .m i { display: block; height: 100%; background: var(--good); border-radius: 99px; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.chip[aria-pressed="true"] .m { background: color-mix(in srgb, var(--on-accent) 30%, transparent); }
+.chip[aria-pressed="true"] .m i { background: var(--sun); }
+.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+
+.quick { display: flex; gap: 10px; flex-wrap: wrap; }
+.link { background: none; border: 0; padding: 4px 2px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; color: var(--accent); }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg label { cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span {
+  display: grid; place-items: center; text-align: center; min-height: 56px; padding: 8px 10px; font-weight: 800; line-height: 1.2;
+  background: var(--bg); border: 3px solid var(--line); border-radius: 16px;
+}
+.seg input:checked + span { background: var(--sun); color: var(--on-sun); box-shadow: 0 4px 0 var(--line); }
+.seg input:focus-visible + span { outline: 4px solid var(--accent); outline-offset: 3px; }
+
+.switch { display: flex; align-items: center; gap: 12px; font-weight: 700; cursor: pointer; }
+.switch input { width: 26px; height: 26px; accent-color: var(--accent); flex: none; }
+
+/* Boutons */
+.btn {
+  border: 3px solid var(--line); border-radius: 18px; padding: 14px 20px; min-height: 58px;
+  font-family: var(--display); font-weight: 600; font-size: 1.2rem; cursor: pointer;
+  box-shadow: 0 5px 0 var(--line); transition: transform .08s, box-shadow .08s;
+  background: var(--surface); color: var(--ink);
+}
+.btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--line); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.good { background: var(--good); color: var(--on-good); }
+.btn.bad { background: var(--bad); color: var(--on-bad); }
+.btn.sun { background: var(--sun); color: var(--on-sun); }
+.btn.big { width: 100%; }
+
+.foot { display: flex; justify-content: center; }
+.foot .link { color: var(--muted); font-size: 0.9rem; }
+
+/* Séance */
+.playbar { display: flex; align-items: center; gap: 14px; }
+.playbar .link { color: var(--ink); flex: none; }
+.meter { flex: 1; height: 16px; background: var(--track); border: 3px solid var(--line); border-radius: 99px; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--good); transition: width .3s; }
+.meter.low i { background: var(--bad); }
+.count { font-weight: 800; font-variant-numeric: tabular-nums; flex: none; min-width: 6.5em; text-align: right; }
+
+.scene { perspective: 1100px; }
+.card { display: grid; position: relative; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3, .8, .3, 1); cursor: pointer; min-height: 250px; }
+.card.noanim { transition: none; }
+.card.flipped { transform: rotateY(180deg); }
+.face {
+  grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--surface); border: 3px solid var(--line); border-radius: 26px; box-shadow: 0 7px 0 var(--line);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 18px; text-align: center;
+}
+.face.back { transform: rotateY(180deg); }
+.card.ok .face.back { background: var(--tint-good); }
+.card.ko .face.back { background: var(--tint-bad); }
+.q { font-family: var(--display); font-weight: 700; font-size: clamp(3.2rem, 17vw, 5.4rem); line-height: 1; margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.q.small { font-size: clamp(1.6rem, 7vw, 2.2rem); color: var(--muted); }
+.a { font-family: var(--display); font-weight: 700; font-size: clamp(3.6rem, 19vw, 6rem); line-height: 1; margin: 0; color: var(--accent); font-variant-numeric: tabular-nums; }
+.card.ok .a { color: var(--ink); }
+.tag { font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tip { margin: 6px 0 0; background: var(--sun); color: var(--on-sun); border-radius: 14px; padding: 8px 14px; font-weight: 700; font-size: .95rem; max-width: 34ch; }
+.tip:empty { display: none; }
+.tip b { font-weight: 800; }
+
+.feedback { min-height: 1.6em; text-align: center; font-weight: 800; font-size: 1.1rem; }
+.feedback.ok { color: var(--good); }
+.feedback.ko { color: var(--bad); }
+.actions { display: flex; gap: 12px; }
+.actions .btn { flex: 1; }
+.actions form { display: flex; gap: 12px; width: 100%; }
+.actions input {
+  flex: 1; min-width: 0; text-align: center; font-family: var(--display); font-weight: 700; font-size: 2rem;
+  background: var(--surface); border: 3px solid var(--line); border-radius: 18px; padding: 8px 10px; min-height: 64px;
+  font-variant-numeric: tabular-nums;
+}
+.actions form .btn { flex: none; }
+
+/* Bilan */
+.stars { display: flex; justify-content: center; gap: 8px; font-size: 3.4rem; line-height: 1; }
+.stars span { color: var(--track); }
+.stars span.on { color: var(--sun); -webkit-text-stroke: 3px var(--line); }
+.done h2 { text-align: center; font-size: 1.9rem; }
+.done .hint { text-align: center; font-size: 1rem; }
+.misses { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.misses li { background: var(--tint-bad); border: 3px solid var(--line); border-radius: 14px; padding: 8px 6px; text-align: center; font-family: var(--display); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+
+@media (max-width: 400px) {
+  .minis { display: none; }
+  .actions .btn { font-size: 1.05rem; padding-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card, .meter i, .chip, .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <h1>Tables en cartes</h1>
+      <p>Choisis tes tables, retourne les cartes, et regarde-les devenir acquises.</p>
+    </div>
+    <div class="minis" aria-hidden="true"><div class="mini m1">6 × 7</div><div class="mini m2">42</div></div>
+  </header>
+
+  <main>
+    <!-- Choix des tables -->
+    <section id="setup" class="stack">
+      <div class="panel">
+        <h2>Quelles tables ?</h2>
+        <div class="chips" id="chips"></div>
+        <div class="quick">
+          <button class="link" type="button" id="allBtn">Toutes les tables</button>
+          <button class="link" type="button" id="noneBtn">Tout décocher</button>
+        </div>
+        <p class="hint">La barre verte montre combien de cartes tu connais déjà dans chaque table.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Comment veux-tu jouer ?</h2>
+        <div class="seg" role="radiogroup" aria-label="Mode de jeu">
+          <label><input type="radio" name="mode" value="flip" id="modeFlip"><span>Cartes à retourner</span></label>
+          <label><input type="radio" name="mode" value="type" id="modeType"><span>Je tape la réponse</span></label>
+        </div>
+        <label class="switch" for="mix"><input type="checkbox" id="mix"><span>Parfois inverser (7 × 8 ou 8 × 7)</span></label>
+        <label class="switch" for="timed"><input type="checkbox" id="timed"><span>Défi chrono : 1 minute pour trouver un maximum de réponses</span></label>
+      </div>
+
+      <button class="btn sun big" type="button" id="startBtn">C'est parti !</button>
+      <p class="hint" id="deckInfo" style="text-align:center"></p>
+      <div class="foot"><button class="link" type="button" id="resetBtn">Effacer mes progrès</button></div>
+    </section>
+
+    <!-- Séance -->
+    <section id="play" class="stack" hidden>
+      <div class="playbar">
+        <button class="link" type="button" id="quit">← Quitter</button>
+        <div class="meter" role="progressbar" aria-label="Cartes acquises" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meter"><i id="bar"></i></div>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="scene">
+        <div class="card" id="card">
+          <div class="face front">
+            <span class="tag" id="tag">Combien font…</span>
+            <p class="q" id="q"></p>
+          </div>
+          <div class="face back">
+            <p class="q small" id="q2"></p>
+            <p class="a" id="ans"></p>
+            <p class="tip" id="tip"></p>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+      <div class="actions" id="actions"></div>
+    </section>
+
+    <!-- Bilan -->
+    <section id="done" class="stack done" hidden>
+      <div class="panel">
+        <div class="stars" id="stars" aria-hidden="true"></div>
+        <h2 id="doneTitle"></h2>
+        <p class="hint" id="doneText"></p>
+      </div>
+      <div class="panel" id="missPanel">
+        <h2>À retravailler</h2>
+        <ul class="misses" id="misses"></ul>
+      </div>
+      <button class="btn primary big" type="button" id="againMiss">Revoir les cartes ratées</button>
+      <button class="btn sun big" type="button" id="againAll">Rejouer toutes les cartes</button>
+      <button class="btn big" type="button" id="backBtn">Changer de tables</button>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+
+  var prefs = Object.assign({ tables: [2, 3, 4, 5], mode: 'flip', mix: true, timed: false }, store.get('tec-prefs', {}));
+  if (!Array.isArray(prefs.tables)) prefs.tables = [2, 3, 4, 5];
+  prefs.tables = prefs.tables.filter(function (t) { return t >= 2 && t <= 10; });
+  var prog = store.get('tec-prog', {});
+  if (!prog || typeof prog !== 'object') prog = {};
+
+  var TIPS = {
+    10: function (n) { return '<b>Astuce ×10 :</b> ' + n + ' suivi d\'un zéro, ça fait ' + 10 * n + '.'; },
+    9: function (n) { return '<b>Astuce ×9 :</b> ' + 10 * n + ' − ' + n + ' = ' + 9 * n + '. Les chiffres du résultat font 9.'; },
+    5: function (n) { return '<b>Astuce ×5 :</b> la moitié de ' + 10 * n + ', c\'est ' + 5 * n + '. Ça finit par 0 ou 5.'; },
+    2: function (n) { return '<b>Astuce ×2 :</b> ' + n + ' + ' + n + ' = ' + 2 * n + '.'; },
+    4: function (n) { return '<b>Astuce ×4 :</b> le double de ' + n + ' est ' + 2 * n + ', puis encore le double : ' + 4 * n + '.'; },
+    6: function (n) { return '<b>Astuce ×6 :</b> 5 × ' + n + ' = ' + 5 * n + ', plus ' + n + ' = ' + 6 * n + '.'; },
+    8: function (n) { return '<b>Astuce ×8 :</b> double trois fois : ' + 2 * n + ', ' + 4 * n + ', ' + 8 * n + '.'; },
+    3: function (n) { return '<b>Astuce ×3 :</b> ' + 2 * n + ' + ' + n + ' = ' + 3 * n + '.'; }
+  };
+  var TIP_ORDER = [10, 9, 5, 2, 4, 6, 8, 3];
+  function tipFor(a, b) {
+    if ((a === 7 && b === 8) || (a === 8 && b === 7)) return '<b>Astuce :</b> 5, 6, 7, 8 → 56 = 7 × 8.';
+    for (var i = 0; i < TIP_ORDER.length; i++) {
+      var t = TIP_ORDER[i];
+      if (a === t) return TIPS[t](b);
+      if (b === t) return TIPS[t](a);
+    }
+    return '';
+  }
+
+  function keyOf(a, b) { return Math.min(a, b) + 'x' + Math.max(a, b); }
+  function acquired(k) { return (prog[k] && prog[k].streak >= 2) ? 1 : 0; }
+  function tableScore(t) { var n = 0; for (var b = 2; b <= 10; b++) n += acquired(keyOf(t, b)); return n; }
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = arr[i]; arr[i] = arr[j]; arr[j] = x; }
+    return arr;
+  }
+  function savePrefs() { store.set('tec-prefs', prefs); }
+  function saveProg() { store.set('tec-prog', prog); }
+
+  var views = { setup: $('#setup'), play: $('#play'), done: $('#done') };
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- Choix des tables ---------- */
+  function buildDeck(tables) {
+    var seen = {}, deck = [];
+    tables.forEach(function (t) {
+      for (var b = 2; b <= 10; b++) {
+        var k = keyOf(t, b);
+        if (seen[k]) continue;
+        seen[k] = true;
+        var x = t, y = b;
+        if (prefs.mix && Math.random() < 0.5) { x = b; y = t; }
+        deck.push({ k: k, a: x, b: y });
+      }
+    });
+    return deck;
+  }
+
+  function renderSetup() {
+    var chips = $('#chips');
+    chips.innerHTML = '';
+    for (var t = 2; t <= 10; t++) {
+      var n = tableScore(t);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      btn.dataset.t = t;
+      btn.setAttribute('aria-pressed', prefs.tables.indexOf(t) >= 0 ? 'true' : 'false');
+      btn.innerHTML = '<span class="n">' + t + '</span><span class="m"><i style="width:' + Math.round(n / 9 * 100) + '%"></i></span><span class="sr">table de ' + t + ', ' + n + ' cartes acquises sur 9</span>';
+      chips.appendChild(btn);
+    }
+    $('#modeFlip').checked = prefs.mode === 'flip';
+    $('#modeType').checked = prefs.mode === 'type';
+    $('#mix').checked = !!prefs.mix;
+    $('#timed').checked = !!prefs.timed;
+    var best = store.get('tec-best', {})[prefs.mode];
+    var count = buildDeck(prefs.tables).length;
+    $('#startBtn').disabled = count === 0;
+    $('#deckInfo').textContent = count === 0
+      ? 'Choisis au moins une table pour commencer.'
+      : (count + (count > 1 ? ' cartes' : ' carte') + ' dans ce paquet' + (prefs.timed && best ? ' · record : ' + best : ''));
+  }
+
+  $('#chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    var t = +b.dataset.t, i = prefs.tables.indexOf(t);
+    if (i >= 0) prefs.tables.splice(i, 1); else prefs.tables.push(t);
+    prefs.tables.sort(function (x, y) { return x - y; });
+    savePrefs(); renderSetup();
+    var again = document.querySelector('.chip[data-t="' + t + '"]');
+    if (again) again.focus();
+  });
+  $('#allBtn').addEventListener('click', function () { prefs.tables = [2, 3, 4, 5, 6, 7, 8, 9, 10]; savePrefs(); renderSetup(); });
+  $('#noneBtn').addEventListener('click', function () { prefs.tables = []; savePrefs(); renderSetup(); });
+  document.querySelectorAll('input[name="mode"]').forEach(function (r) {
+    r.addEventListener('change', function () { prefs.mode = r.value; savePrefs(); renderSetup(); });
+  });
+  $('#mix').addEventListener('change', function (e) { prefs.mix = e.target.checked; savePrefs(); renderSetup(); });
+  $('#timed').addEventListener('change', function (e) { prefs.timed = e.target.checked; savePrefs(); renderSetup(); });
+
+  var resetTimer = null;
+  $('#resetBtn').addEventListener('click', function () {
+    var btn = $('#resetBtn');
+    if (resetTimer) {
+      clearTimeout(resetTimer); resetTimer = null;
+      prog = {}; store.del('tec-prog');
+      btn.textContent = 'Effacer mes progrès';
+      renderSetup();
+      return;
+    }
+    btn.textContent = 'Sûr ? Appuie encore pour tout effacer';
+    resetTimer = setTimeout(function () { resetTimer = null; btn.textContent = 'Effacer mes progrès'; }, 4000);
+  });
+
+  /* ---------- Séance ---------- */
+  var S = null;
+  var card = $('#card'), actions = $('#actions'), feedback = $('#feedback');
+
+  var TIME_LIMIT = 60000;
+  function clearTimer() { if (S && S.timer) { clearInterval(S.timer); S.timer = null; } }
+
+  function startSession(deck, timed) {
+    clearTimer();
+    S = { queue: shuffle(deck.slice()), source: deck.slice(), total: deck.length, known: 0, tries: 0, missed: {}, phase: 'ask', lastOk: false, timed: !!timed, endAt: 0, timer: null, done: false };
+    show('play');
+    if (S.timed) showReady(); else showCard();
+  }
+
+  function showReady() {
+    card.classList.add('noanim');
+    card.classList.remove('flipped', 'ok', 'ko');
+    $('#tag').textContent = 'Défi chrono';
+    $('#q').textContent = 'Prêt ?';
+    $('#q2').textContent = '';
+    $('#ans').textContent = '';
+    $('#tip').innerHTML = '';
+    void card.offsetWidth;
+    card.classList.remove('noanim');
+    feedback.textContent = 'Trouve un maximum de bonnes réponses en 1 minute.';
+    feedback.className = 'feedback';
+    S.phase = 'ready';
+    updateMeter(TIME_LIMIT);
+    renderActions();
+  }
+
+  function startClock() {
+    S.endAt = Date.now() + TIME_LIMIT;
+    S.timer = setInterval(tick, 200);
+    showCard();
+  }
+
+  function tick() {
+    if (!S || !S.timed || !S.endAt || S.done) return;
+    var left = S.endAt - Date.now();
+    if (left <= 0) { finish(); return; }
+    updateMeter(left);
+  }
+
+  function record(k, ok) {
+    var p = prog[k] || { streak: 0, miss: 0 };
+    if (ok) p.streak += 1; else { p.streak = 0; p.miss += 1; }
+    prog[k] = p;
+    saveProg();
+  }
+
+  function updateMeter(left) {
+    var pct, meter = $('#meter');
+    if (S.timed) {
+      if (left === undefined) left = S.endAt ? Math.max(0, S.endAt - Date.now()) : TIME_LIMIT;
+      pct = Math.round(left / TIME_LIMIT * 100);
+      var sec = Math.ceil(left / 1000);
+      $('#count').textContent = Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2) + ' · ' + S.known + ' ✓';
+      meter.classList.toggle('low', left <= 10000);
+      meter.setAttribute('aria-label', 'Temps restant');
+    } else {
+      pct = S.total ? Math.round(S.known / S.total * 100) : 0;
+      $('#count').textContent = S.known + ' sur ' + S.total;
+      meter.classList.remove('low');
+      meter.setAttribute('aria-label', 'Cartes acquises');
+    }
+    $('#bar').style.width = pct + '%';
+    meter.setAttribute('aria-valuenow', pct);
+  }
+
+  function showCard() {
+    if (!S.queue.length) {
+      if (S.timed) S.queue = shuffle(S.source.map(function (x) { return { k: x.k, a: x.a, b: x.b }; }));
+      else return finish();
+    }
+    var c = S.queue[0];
+    card.classList.add('noanim');
+    card.classList.remove('flipped', 'ok', 'ko');
+    $('#q').textContent = c.a + ' × ' + c.b;
+    $('#tag').textContent = 'Combien font…';
+    $('#q2').textContent = c.a + ' × ' + c.b + ' =';
+    $('#ans').textContent = c.a * c.b;
+    $('#tip').innerHTML = tipFor(c.a, c.b);
+    void card.offsetWidth;
+    card.classList.remove('noanim');
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    S.phase = 'ask';
+    updateMeter();
+    renderActions();
+  }
+
+  function renderActions() {
+    if (S.phase === 'ready') {
+      actions.innerHTML = '<button class="btn sun big" type="button" data-act="go">Lancer le chrono (1 min)</button>';
+      actions.querySelector('[data-act]').focus({ preventScroll: true });
+      return;
+    }
+    if (prefs.mode === 'flip') {
+      if (S.phase === 'ask') {
+        actions.innerHTML = '<button class="btn primary big" type="button" data-act="reveal">Montrer la réponse</button>';
+      } else {
+        actions.innerHTML = '<button class="btn bad" type="button" data-act="review">À revoir</button><button class="btn good" type="button" data-act="know">Je le savais !</button>';
+      }
+    } else {
+      if (S.phase === 'ask') {
+        actions.innerHTML = '<form id="answerForm" autocomplete="off"><label class="sr" for="answer">Ta réponse</label><input id="answer" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="?"><button class="btn primary" type="submit">Valider</button></form>';
+      } else {
+        actions.innerHTML = '<button class="btn primary big" type="button" data-act="next">Carte suivante</button>';
+      }
+    }
+    var focusTarget = actions.querySelector('input') || actions.querySelector('[data-act="know"]') || actions.querySelector('[data-act]');
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+  }
+
+  function reveal() {
+    if (S.phase !== 'ask') return;
+    S.phase = 'revealed';
+    card.classList.add('flipped');
+    renderActions();
+  }
+  function know() {
+    var c = S.queue.shift();
+    record(c.k, true);
+    S.known += 1;
+    S.tries += 1;
+    showCard();
+  }
+  function review() {
+    var c = S.queue.shift();
+    record(c.k, false);
+    S.missed[c.k] = { k: c.k, a: c.a, b: c.b };
+    S.tries += 1;
+    var at = Math.min(S.queue.length, 2 + Math.floor(Math.random() * 3));
+    S.queue.splice(at, 0, c);
+    showCard();
+  }
+  function check(raw) {
+    var c = S.queue[0];
+    var v = parseInt(String(raw).trim(), 10);
+    if (isNaN(v)) { var el = $('#answer'); if (el) el.focus(); return; }
+    S.lastOk = v === c.a * c.b;
+    S.phase = 'revealed';
+    card.classList.add('flipped', S.lastOk ? 'ok' : 'ko');
+    if (S.lastOk) {
+      var yes = ['Bravo !', 'Exact !', 'Bien joué !', 'Oui, c\'est ça !'];
+      feedback.textContent = yes[Math.floor(Math.random() * yes.length)];
+      feedback.className = 'feedback ok';
+    } else {
+      feedback.textContent = 'Pas tout à fait : tu as écrit ' + v + '. Cette carte reviendra.';
+      feedback.className = 'feedback ko';
+    }
+    renderActions();
+    if (S.timed && S.lastOk) {
+      var sess = S, cur = c;
+      setTimeout(function () {
+        if (S === sess && !S.done && S.queue[0] === cur && S.phase === 'revealed') know();
+      }, 700);
+    }
+  }
+
+  card.addEventListener('click', function () { if (prefs.mode === 'flip') reveal(); });
+  actions.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b) return;
+    var act = b.dataset.act;
+    if (act === 'go') startClock();
+    else if (act === 'reveal') reveal();
+    else if (act === 'know') know();
+    else if (act === 'review') review();
+    else if (act === 'next') { if (S.lastOk) know(); else review(); }
+  });
+  actions.addEventListener('submit', function (e) {
+    e.preventDefault();
+    check($('#answer').value);
+  });
+  $('#quit').addEventListener('click', function () { clearTimer(); S = null; renderSetup(); show('setup'); });
+
+  /* ---------- Bilan ---------- */
+  function finish() {
+    if (S.done) return;
+    S.done = true;
+    clearTimer();
+    var missed = Object.keys(S.missed).map(function (k) { return S.missed[k]; });
+    var first = S.total - missed.length;
+    var ratio = S.total ? first / S.total : 1;
+    var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1;
+    var titles = ['', 'Continue, ça vient !', 'Bien joué !', 'Superbe !'];
+    var starHtml = '';
+    for (var i = 1; i <= 3; i++) starHtml += '<span class="' + (i <= stars ? 'on' : '') + '">★</span>';
+    $('#stars').innerHTML = starHtml;
+    $('#doneTitle').textContent = titles[stars];
+    $('#doneText').textContent = first + ' carte' + (first > 1 ? 's' : '') + ' sur ' + S.total + ' du premier coup.';
+    $('#stars').hidden = !!S.timed;
+    if (S.timed) {
+      var bests = store.get('tec-best', {});
+      var prev = bests[prefs.mode] || 0;
+      var isRecord = S.known > prev;
+      if (isRecord) { bests[prefs.mode] = S.known; store.set('tec-best', bests); }
+      $('#doneTitle').textContent = S.known === 0 ? 'Le temps est écoulé !' : S.known + (S.known > 1 ? ' bonnes réponses !' : ' bonne réponse !');
+      var recordText = isRecord ? (prev ? ' Nouveau record ! Avant : ' + prev + '.' : ' Premier record enregistré !') : (prev ? ' Ton record : ' + prev + '.' : '');
+      $('#doneText').textContent = 'Tu as vu ' + S.tries + ' carte' + (S.tries > 1 ? 's' : '') + ' en 1 minute.' + recordText;
+    }
+    var list = $('#misses');
+    list.innerHTML = '';
+    missed.forEach(function (m) {
+      var li = document.createElement('li');
+      li.textContent = m.a + ' × ' + m.b + ' = ' + (m.a * m.b);
+      list.appendChild(li);
+    });
+    $('#missPanel').hidden = missed.length === 0;
+    $('#againMiss').hidden = missed.length === 0;
+    S.retry = missed;
+    $('#againAll').textContent = S.timed ? 'Relancer le chrono' : 'Rejouer toutes les cartes';
+    show('done');
+  }
+  $('#againMiss').addEventListener('click', function () {
+    var deck = S.retry.map(function (m) { return { k: m.k, a: m.a, b: m.b }; });
+    startSession(deck, false);
+  });
+  $('#againAll').addEventListener('click', function () { startSession(buildDeck(prefs.tables), prefs.timed); });
+  $('#backBtn').addEventListener('click', function () { renderSetup(); show('setup'); });
+  $('#startBtn').addEventListener('click', function () {
+    var deck = buildDeck(prefs.tables);
+    if (deck.length) startSession(deck, prefs.timed);
+  });
+
+  renderSetup();
+})();
+</script>
+</body>
+</html>
