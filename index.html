@@ -3,12 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>:root{color-scheme:light}body{margin:0}</style>
 <title>Tables en cartes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<meta name="description" content="Flashcards pour apprendre les tables de multiplication de 2 à 12.">
+<meta name="theme-color" content="#EAF0FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1430" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tables">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('fonts/fredoka-latin.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-style: normal; font-weight: 200 1000; font-display: swap; src: url('fonts/nunito-latin.woff2') format('woff2'); }
+
 /* Layout: une colonne centrée, une grosse carte au milieu, boutons épais à pouce. */
 :root {
   --bg: #EAF0FF;
@@ -29,9 +38,10 @@
   --tint-bad: #FFE1DC;
   --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
   --body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root {
     --bg: #0F1430;
     --surface: #1B2250;
     --ink: #EEF1FF;
@@ -47,36 +57,24 @@
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
-  --bg: #0F1430;
-  --surface: #1B2250;
-  --ink: #EEF1FF;
-  --muted: #A5AFD9;
-  --line: #EEF1FF;
-  --track: #2A3370;
-  --accent: #8AA2FF;
-  --on-accent: #0E1230;
-  --good: #3DDC97;
-  --bad: #FF8A7E;
-  --tint-good: #1B4A3B;
-  --tint-bad: #58262A;
-  color-scheme: dark;
-}
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--body);
   font-size: 17px;
   line-height: 1.45;
-  padding-block: 22px 48px;
+  padding-top: calc(22px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-button, input { font: inherit; color: inherit; }
+button { font: inherit; color: inherit; touch-action: manipulation; }
 :focus-visible { outline: 4px solid var(--sun); outline-offset: 3px; }
 
 /* En-tête */
@@ -96,6 +94,7 @@ button, input { font: inherit; color: inherit; }
 .panel { background: var(--surface); border: 3px solid var(--line); border-radius: 22px; box-shadow: 0 6px 0 var(--line); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 .panel h2 { font-family: var(--display); font-weight: 600; font-size: 1.25rem; margin: 0; }
 .hint { color: var(--muted); font-weight: 700; font-size: 0.9rem; margin: 0; }
+.center { text-align: center; }
 
 .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 10px; }
 .chip {
@@ -111,21 +110,23 @@ button, input { font: inherit; color: inherit; }
 .chip[aria-pressed="true"] .m i { background: var(--sun); }
 .chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
 
-.quick { display: flex; gap: 10px; flex-wrap: wrap; }
+.quick { display: flex; gap: 6px 14px; flex-wrap: wrap; }
 .link { background: none; border: 0; padding: 4px 2px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; color: var(--accent); }
 
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .seg label { cursor: pointer; }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg span {
-  display: grid; place-items: center; text-align: center; min-height: 56px; padding: 8px 10px; font-weight: 800; line-height: 1.2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; min-height: 56px; padding: 8px 10px; font-weight: 800; line-height: 1.2;
   background: var(--bg); border: 3px solid var(--line); border-radius: 16px;
 }
+.seg small { font-family: var(--display); font-weight: 500; font-size: .95rem; margin-top: 3px; white-space: nowrap; }
 .seg input:checked + span { background: var(--sun); color: var(--on-sun); box-shadow: 0 4px 0 var(--line); }
 .seg input:focus-visible + span { outline: 4px solid var(--accent); outline-offset: 3px; }
 
+.switches { display: flex; flex-direction: column; gap: 12px; }
 .switch { display: flex; align-items: center; gap: 12px; font-weight: 700; cursor: pointer; }
-.switch input { width: 26px; height: 26px; accent-color: var(--accent); flex: none; }
+.switch input { width: 26px; height: 26px; accent-color: var(--accent); flex: none; margin: 0; }
 
 /* Boutons */
 .btn {
@@ -155,6 +156,7 @@ button, input { font: inherit; color: inherit; }
 
 .scene { perspective: 1100px; }
 .card { display: grid; position: relative; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3, .8, .3, 1); cursor: pointer; min-height: 250px; }
+#play.typing .card { min-height: 190px; cursor: default; }
 .card.noanim { transition: none; }
 .card.flipped { transform: rotateY(180deg); }
 .face {
@@ -162,11 +164,13 @@ button, input { font: inherit; color: inherit; }
   background: var(--surface); border: 3px solid var(--line); border-radius: 26px; box-shadow: 0 7px 0 var(--line);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 18px; text-align: center;
 }
+#play.typing .face { padding-block: 16px; }
 .face.back { transform: rotateY(180deg); }
 .card.ok .face.back { background: var(--tint-good); }
 .card.ko .face.back { background: var(--tint-bad); }
 .q { font-family: var(--display); font-weight: 700; font-size: clamp(3.2rem, 17vw, 5.4rem); line-height: 1; margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.q.small { font-size: clamp(1.6rem, 7vw, 2.2rem); color: var(--muted); }
+.q.long { font-size: clamp(2.3rem, 11.5vw, 4rem); }
+.q.small { font-size: clamp(1.5rem, 6.5vw, 2.1rem); color: var(--muted); }
 .a { font-family: var(--display); font-weight: 700; font-size: clamp(3.6rem, 19vw, 6rem); line-height: 1; margin: 0; color: var(--accent); font-variant-numeric: tabular-nums; }
 .card.ok .a { color: var(--ink); }
 .tag { font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -179,13 +183,25 @@ button, input { font: inherit; color: inherit; }
 .feedback.ko { color: var(--bad); }
 .actions { display: flex; gap: 12px; }
 .actions .btn { flex: 1; }
-.actions form { display: flex; gap: 12px; width: 100%; }
-.actions input {
-  flex: 1; min-width: 0; text-align: center; font-family: var(--display); font-weight: 700; font-size: 2rem;
-  background: var(--surface); border: 3px solid var(--line); border-radius: 18px; padding: 8px 10px; min-height: 64px;
-  font-variant-numeric: tabular-nums;
+
+/* Pavé numérique */
+.pad { display: flex; flex-direction: column; gap: 12px; }
+.answer {
+  min-height: 64px; display: grid; place-items: center; background: var(--surface); border: 3px solid var(--line); border-radius: 18px;
+  font-family: var(--display); font-weight: 700; font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums;
 }
-.actions form .btn { flex: none; }
+.answer.empty { color: var(--muted); }
+.keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.key {
+  min-height: 58px; display: grid; place-items: center; cursor: pointer;
+  background: var(--surface); color: var(--ink); border: 3px solid var(--line); border-radius: 16px; box-shadow: 0 4px 0 var(--line);
+  font-family: var(--display); font-weight: 600; font-size: 1.6rem; transition: transform .06s, box-shadow .06s;
+}
+.key:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.key.del { background: var(--bg); }
+.key.ok { background: var(--good); color: var(--on-good); }
+.key svg { width: 30px; height: 30px; }
+.pad.locked .key { opacity: .45; pointer-events: none; }
 
 /* Bilan */
 .stars { display: flex; justify-content: center; gap: 8px; font-size: 3.4rem; line-height: 1; }
@@ -193,21 +209,34 @@ button, input { font: inherit; color: inherit; }
 .stars span.on { color: var(--sun); -webkit-text-stroke: 3px var(--line); }
 .done h2 { text-align: center; font-size: 1.9rem; }
 .done .hint { text-align: center; font-size: 1rem; }
-.misses { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.misses { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
 .misses li { background: var(--tint-bad); border: 3px solid var(--line); border-radius: 14px; padding: 8px 6px; text-align: center; font-family: var(--display); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .stack { display: flex; flex-direction: column; gap: 14px; }
+
+/* Cartes difficiles */
+.hardlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.hardlist li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 14px; border: 3px solid var(--line); border-radius: 14px; background: var(--bg); }
+.hardlist .eq { flex: 1 1 auto; font-family: var(--display); font-weight: 600; font-size: 1.25rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hardlist .miss { color: var(--muted); font-weight: 700; font-size: .9rem; white-space: nowrap; }
+.pill { font-weight: 800; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; white-space: nowrap; color: var(--ink); }
+.pill.ok { background: var(--tint-good); }
+.pill.ko { background: var(--tint-bad); }
+
+/* Confettis */
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
+.confetti i { position: absolute; top: -16px; width: 10px; height: 14px; border-radius: 2px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translate(var(--dx), 110vh) rotate(var(--r)); } }
 
 @media (max-width: 400px) {
   .minis { display: none; }
   .actions .btn { font-size: 1.05rem; padding-inline: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .card, .meter i, .chip, .btn { transition: none; }
+  .card, .meter i, .chip, .btn, .key { transition: none; }
 }
 </style>
 </head>
 <body>
-
 <div class="wrap">
   <header class="head">
     <div>
@@ -218,7 +247,7 @@ button, input { font: inherit; color: inherit; }
   </header>
 
   <main>
-    <!-- Choix des tables -->
+    <!-- Réglages -->
     <section id="setup" class="stack">
       <div class="panel">
         <h2>Quelles tables ?</h2>
@@ -226,8 +255,19 @@ button, input { font: inherit; color: inherit; }
         <div class="quick">
           <button class="link" type="button" id="allBtn">Toutes les tables</button>
           <button class="link" type="button" id="noneBtn">Tout décocher</button>
+          <button class="link" type="button" id="hardBtn">Mes cartes difficiles</button>
         </div>
         <p class="hint">La barre verte montre combien de cartes tu connais déjà dans chaque table.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Quel exercice ?</h2>
+        <div class="seg" role="radiogroup" aria-label="Type d'exercice">
+          <label><input type="radio" name="kind" value="mul" id="kindMul"><span>Multiplications<small>7 × 8 = ?</small></span></label>
+          <label><input type="radio" name="kind" value="missing" id="kindMissing"><span>Nombre manquant<small>7 × ? = 56</small></span></label>
+          <label><input type="radio" name="kind" value="div" id="kindDiv"><span>Divisions<small>56 ÷ 7 = ?</small></span></label>
+          <label><input type="radio" name="kind" value="mixed" id="kindMixed"><span>Un peu de tout<small>× ? ÷</small></span></label>
+        </div>
       </div>
 
       <div class="panel">
@@ -236,13 +276,28 @@ button, input { font: inherit; color: inherit; }
           <label><input type="radio" name="mode" value="flip" id="modeFlip"><span>Cartes à retourner</span></label>
           <label><input type="radio" name="mode" value="type" id="modeType"><span>Je tape la réponse</span></label>
         </div>
-        <label class="switch" for="mix"><input type="checkbox" id="mix"><span>Parfois inverser (7 × 8 ou 8 × 7)</span></label>
-        <label class="switch" for="timed"><input type="checkbox" id="timed"><span>Défi chrono : 1 minute pour trouver un maximum de réponses</span></label>
+        <div class="switches">
+          <label class="switch" for="mix"><input type="checkbox" id="mix"><span>Parfois inverser (7 × 8 ou 8 × 7)</span></label>
+          <label class="switch" for="fresh"><input type="checkbox" id="fresh"><span>Seulement les cartes pas encore acquises</span></label>
+          <label class="switch" for="timed"><input type="checkbox" id="timed"><span>Défi chrono : 1 minute pour trouver un maximum de réponses</span></label>
+          <label class="switch" for="fx"><input type="checkbox" id="fx"><span>Sons et confettis</span></label>
+        </div>
       </div>
 
       <button class="btn sun big" type="button" id="startBtn">C'est parti !</button>
-      <p class="hint" id="deckInfo" style="text-align:center"></p>
+      <p class="hint center" id="deckInfo"></p>
       <div class="foot"><button class="link" type="button" id="resetBtn">Effacer mes progrès</button></div>
+    </section>
+
+    <!-- Cartes difficiles -->
+    <section id="hard" class="stack" hidden>
+      <div class="panel">
+        <h2>Mes cartes difficiles</h2>
+        <p class="hint" id="hardIntro"></p>
+        <ul class="hardlist" id="hardList"></ul>
+      </div>
+      <button class="btn primary big" type="button" id="hardPlay">S'entraîner sur ces cartes</button>
+      <button class="btn big" type="button" id="hardBack">Retour</button>
     </section>
 
     <!-- Séance -->
@@ -254,11 +309,11 @@ button, input { font: inherit; color: inherit; }
       </div>
       <div class="scene">
         <div class="card" id="card">
-          <div class="face front">
+          <div class="face front" id="front">
             <span class="tag" id="tag">Combien font…</span>
             <p class="q" id="q"></p>
           </div>
-          <div class="face back">
+          <div class="face back" id="back" aria-hidden="true">
             <p class="q small" id="q2"></p>
             <p class="a" id="ans"></p>
             <p class="tip" id="tip"></p>
@@ -266,6 +321,25 @@ button, input { font: inherit; color: inherit; }
         </div>
       </div>
       <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+      <div class="pad" id="pad" hidden>
+        <div class="answer empty" id="answer" aria-live="polite" aria-label="Ta réponse">?</div>
+        <div class="keys">
+          <button class="key" type="button" data-key="1">1</button>
+          <button class="key" type="button" data-key="2">2</button>
+          <button class="key" type="button" data-key="3">3</button>
+          <button class="key" type="button" data-key="4">4</button>
+          <button class="key" type="button" data-key="5">5</button>
+          <button class="key" type="button" data-key="6">6</button>
+          <button class="key" type="button" data-key="7">7</button>
+          <button class="key" type="button" data-key="8">8</button>
+          <button class="key" type="button" data-key="9">9</button>
+          <button class="key del" type="button" data-key="del" aria-label="Effacer le dernier chiffre">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/></svg>
+          </button>
+          <button class="key" type="button" data-key="0">0</button>
+          <button class="key ok" type="button" data-key="ok">OK</button>
+        </div>
+      </div>
       <div class="actions" id="actions"></div>
     </section>
 
@@ -281,7 +355,7 @@ button, input { font: inherit; color: inherit; }
         <ul class="misses" id="misses"></ul>
       </div>
       <button class="btn primary big" type="button" id="againMiss">Revoir les cartes ratées</button>
-      <button class="btn sun big" type="button" id="againAll">Rejouer toutes les cartes</button>
+      <button class="btn sun big" type="button" id="againAll">Rejouer une partie</button>
       <button class="btn big" type="button" id="backBtn">Changer de tables</button>
     </section>
   </main>
@@ -296,24 +370,38 @@ button, input { font: inherit; color: inherit; }
     del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
   };
 
-  var prefs = Object.assign({ tables: [2, 3, 4, 5], mode: 'flip', mix: true, timed: false }, store.get('tec-prefs', {}));
+  var TABLES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  var KINDS = ['mul', 'missing', 'div'];
+  var TIME_LIMIT = 60000;
+
+  var prefs = Object.assign({ tables: [2, 3, 4, 5], mode: 'flip', kind: 'mul', mix: true, fresh: false, timed: false, fx: true }, store.get('tec-prefs', {}));
   if (!Array.isArray(prefs.tables)) prefs.tables = [2, 3, 4, 5];
-  prefs.tables = prefs.tables.filter(function (t) { return t >= 2 && t <= 10; });
+  prefs.tables = prefs.tables.filter(function (t) { return TABLES.indexOf(t) >= 0; });
+  if (['flip', 'type'].indexOf(prefs.mode) < 0) prefs.mode = 'flip';
+  if (KINDS.concat('mixed').indexOf(prefs.kind) < 0) prefs.kind = 'mul';
   var prog = store.get('tec-prog', {});
   if (!prog || typeof prog !== 'object') prog = {};
 
+  function savePrefs() { store.set('tec-prefs', prefs); }
+  function saveProg() { store.set('tec-prog', prog); }
+
+  /* ---------- Astuces ---------- */
   var TIPS = {
     10: function (n) { return '<b>Astuce ×10 :</b> ' + n + ' suivi d\'un zéro, ça fait ' + 10 * n + '.'; },
+    11: function (n) { return n < 10 ? '<b>Astuce ×11 :</b> ' + n + ' écrit deux fois, ça fait ' + 11 * n + '.' : '<b>Astuce ×11 :</b> ' + 10 * n + ' + ' + n + ' = ' + 11 * n + '.'; },
     9: function (n) { return '<b>Astuce ×9 :</b> ' + 10 * n + ' − ' + n + ' = ' + 9 * n + '. Les chiffres du résultat font 9.'; },
     5: function (n) { return '<b>Astuce ×5 :</b> la moitié de ' + 10 * n + ', c\'est ' + 5 * n + '. Ça finit par 0 ou 5.'; },
     2: function (n) { return '<b>Astuce ×2 :</b> ' + n + ' + ' + n + ' = ' + 2 * n + '.'; },
     4: function (n) { return '<b>Astuce ×4 :</b> le double de ' + n + ' est ' + 2 * n + ', puis encore le double : ' + 4 * n + '.'; },
+    12: function (n) { return '<b>Astuce ×12 :</b> 10 × ' + n + ' + 2 × ' + n + ' = ' + 10 * n + ' + ' + 2 * n + ' = ' + 12 * n + '.'; },
     6: function (n) { return '<b>Astuce ×6 :</b> 5 × ' + n + ' = ' + 5 * n + ', plus ' + n + ' = ' + 6 * n + '.'; },
     8: function (n) { return '<b>Astuce ×8 :</b> double trois fois : ' + 2 * n + ', ' + 4 * n + ', ' + 8 * n + '.'; },
     3: function (n) { return '<b>Astuce ×3 :</b> ' + 2 * n + ' + ' + n + ' = ' + 3 * n + '.'; }
   };
-  var TIP_ORDER = [10, 9, 5, 2, 4, 6, 8, 3];
-  function tipFor(a, b) {
+  var TIP_ORDER = [10, 11, 9, 5, 2, 4, 12, 6, 8, 3];
+  function tipFor(c) {
+    var a = c.a, b = c.b;
+    if (c.kind !== 'mul') return '<b>Astuce :</b> pense à la table de ' + a + ' : ' + a + ' × ' + b + ' = ' + a * b + '.';
     if ((a === 7 && b === 8) || (a === 8 && b === 7)) return '<b>Astuce :</b> 5, 6, 7, 8 → 56 = 7 × 8.';
     for (var i = 0; i < TIP_ORDER.length; i++) {
       var t = TIP_ORDER[i];
@@ -323,42 +411,109 @@ button, input { font: inherit; color: inherit; }
     return '';
   }
 
+  /* ---------- Cartes ---------- */
   function keyOf(a, b) { return Math.min(a, b) + 'x' + Math.max(a, b); }
-  function acquired(k) { return (prog[k] && prog[k].streak >= 2) ? 1 : 0; }
-  function tableScore(t) { var n = 0; for (var b = 2; b <= 10; b++) n += acquired(keyOf(t, b)); return n; }
+  function acquired(k) { return !!(prog[k] && prog[k].streak >= 2); }
+  function tableScore(t) { var n = 0; for (var b = 2; b <= 10; b++) if (acquired(keyOf(t, b))) n++; return n; }
   function shuffle(arr) {
     for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var x = arr[i]; arr[i] = arr[j]; arr[j] = x; }
     return arr;
   }
-  function savePrefs() { store.set('tec-prefs', prefs); }
-  function saveProg() { store.set('tec-prog', prog); }
 
-  var views = { setup: $('#setup'), play: $('#play'), done: $('#done') };
-  function show(name) {
-    Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
-    window.scrollTo(0, 0);
+  // a est le facteur affiché en premier (le diviseur pour une division), b celui à trouver.
+  function makeCard(t, b) {
+    var kind = prefs.kind === 'mixed' ? KINDS[Math.floor(Math.random() * KINDS.length)] : prefs.kind;
+    var x = t, y = b;
+    if (prefs.mix && Math.random() < 0.5) { x = b; y = t; }
+    var k = keyOf(t, b);
+    return { id: k + kind, k: k, a: x, b: y, kind: kind };
+  }
+  function copyCard(c) { return { id: c.id, k: c.k, a: c.a, b: c.b, kind: c.kind }; }
+  function question(c) {
+    if (c.kind === 'missing') return c.a + ' × ? = ' + c.a * c.b;
+    if (c.kind === 'div') return c.a * c.b + ' ÷ ' + c.a;
+    return c.a + ' × ' + c.b;
+  }
+  function answerOf(c) { return c.kind === 'mul' ? c.a * c.b : c.b; }
+  function solution(c) {
+    if (c.kind === 'div') return c.a * c.b + ' ÷ ' + c.a + ' = ' + c.b;
+    return c.a + ' × ' + c.b + ' = ' + c.a * c.b;
   }
 
-  /* ---------- Choix des tables ---------- */
   function buildDeck(tables) {
     var seen = {}, deck = [];
     tables.forEach(function (t) {
       for (var b = 2; b <= 10; b++) {
         var k = keyOf(t, b);
-        if (seen[k]) continue;
+        if (seen[k] || (prefs.fresh && acquired(k))) continue;
         seen[k] = true;
-        var x = t, y = b;
-        if (prefs.mix && Math.random() < 0.5) { x = b; y = t; }
-        deck.push({ k: k, a: x, b: y });
+        deck.push(makeCard(t, b));
       }
     });
     return deck;
   }
 
+  function bestKey() { return prefs.kind === 'mul' ? prefs.mode : prefs.mode + '-' + prefs.kind; }
+
+  /* ---------- Sons et confettis ---------- */
+  var audio = null;
+  var SOUNDS = {
+    ok: [{ f: 880, at: 0, d: 0.12 }, { f: 1320, at: 0.08, d: 0.18 }],
+    ko: [{ f: 220, at: 0, d: 0.25, type: 'triangle' }],
+    win: [{ f: 523, at: 0, d: 0.18 }, { f: 659, at: 0.12, d: 0.18 }, { f: 784, at: 0.24, d: 0.18 }, { f: 1047, at: 0.36, d: 0.45 }]
+  };
+  function sound(name) {
+    if (!prefs.fx) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      var t0 = audio.currentTime;
+      SOUNDS[name].forEach(function (n) {
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.type = n.type || 'sine';
+        o.frequency.value = n.f;
+        g.gain.setValueAtTime(0.0001, t0 + n.at);
+        g.gain.exponentialRampToValueAtTime(0.15, t0 + n.at + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.at + n.d);
+        o.connect(g);
+        g.connect(audio.destination);
+        o.start(t0 + n.at);
+        o.stop(t0 + n.at + n.d + 0.05);
+      });
+    } catch (e) {}
+  }
+  function confetti() {
+    if (!prefs.fx || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var box = document.createElement('div');
+    box.className = 'confetti';
+    box.setAttribute('aria-hidden', 'true');
+    var colors = ['var(--sun)', 'var(--accent)', 'var(--good)', 'var(--bad)'];
+    for (var i = 0; i < 70; i++) {
+      var p = document.createElement('i');
+      p.style.left = Math.random() * 100 + '%';
+      p.style.background = colors[i % colors.length];
+      p.style.animationDelay = Math.random() * 0.6 + 's';
+      p.style.animationDuration = 1.6 + Math.random() * 1.2 + 's';
+      p.style.setProperty('--dx', Math.random() * 160 - 80 + 'px');
+      p.style.setProperty('--r', Math.random() * 720 - 360 + 'deg');
+      box.appendChild(p);
+    }
+    document.body.appendChild(box);
+    setTimeout(function () { box.remove(); }, 3600);
+  }
+
+  /* ---------- Écrans ---------- */
+  var views = { setup: $('#setup'), hard: $('#hard'), play: $('#play'), done: $('#done') };
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- Réglages ---------- */
   function renderSetup() {
     var chips = $('#chips');
     chips.innerHTML = '';
-    for (var t = 2; t <= 10; t++) {
+    TABLES.forEach(function (t) {
       var n = tableScore(t);
       var btn = document.createElement('button');
       btn.type = 'button';
@@ -367,17 +522,19 @@ button, input { font: inherit; color: inherit; }
       btn.setAttribute('aria-pressed', prefs.tables.indexOf(t) >= 0 ? 'true' : 'false');
       btn.innerHTML = '<span class="n">' + t + '</span><span class="m"><i style="width:' + Math.round(n / 9 * 100) + '%"></i></span><span class="sr">table de ' + t + ', ' + n + ' cartes acquises sur 9</span>';
       chips.appendChild(btn);
-    }
-    $('#modeFlip').checked = prefs.mode === 'flip';
-    $('#modeType').checked = prefs.mode === 'type';
-    $('#mix').checked = !!prefs.mix;
-    $('#timed').checked = !!prefs.timed;
-    var best = store.get('tec-best', {})[prefs.mode];
+    });
+    document.querySelectorAll('input[name="kind"]').forEach(function (r) { r.checked = r.value === prefs.kind; });
+    document.querySelectorAll('input[name="mode"]').forEach(function (r) { r.checked = r.value === prefs.mode; });
+    ['mix', 'fresh', 'timed', 'fx'].forEach(function (id) { $('#' + id).checked = !!prefs[id]; });
+
     var count = buildDeck(prefs.tables).length;
+    var best = store.get('tec-best', {})[bestKey()];
+    var info;
+    if (!prefs.tables.length) info = 'Choisis au moins une table pour commencer.';
+    else if (!count) info = 'Bravo, toutes les cartes de ces tables sont acquises ! Décoche « Seulement les cartes pas encore acquises » pour les revoir.';
+    else info = count + (count > 1 ? ' cartes' : ' carte') + ' dans ce paquet' + (prefs.timed && best ? ' · record : ' + best : '');
     $('#startBtn').disabled = count === 0;
-    $('#deckInfo').textContent = count === 0
-      ? 'Choisis au moins une table pour commencer.'
-      : (count + (count > 1 ? ' cartes' : ' carte') + ' dans ce paquet' + (prefs.timed && best ? ' · record : ' + best : ''));
+    $('#deckInfo').textContent = info;
   }
 
   $('#chips').addEventListener('click', function (e) {
@@ -390,20 +547,23 @@ button, input { font: inherit; color: inherit; }
     var again = document.querySelector('.chip[data-t="' + t + '"]');
     if (again) again.focus();
   });
-  $('#allBtn').addEventListener('click', function () { prefs.tables = [2, 3, 4, 5, 6, 7, 8, 9, 10]; savePrefs(); renderSetup(); });
+  $('#allBtn').addEventListener('click', function () { prefs.tables = TABLES.slice(); savePrefs(); renderSetup(); });
   $('#noneBtn').addEventListener('click', function () { prefs.tables = []; savePrefs(); renderSetup(); });
-  document.querySelectorAll('input[name="mode"]').forEach(function (r) {
-    r.addEventListener('change', function () { prefs.mode = r.value; savePrefs(); renderSetup(); });
+  ['kind', 'mode'].forEach(function (name) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function (r) {
+      r.addEventListener('change', function () { prefs[name] = r.value; savePrefs(); renderSetup(); });
+    });
   });
-  $('#mix').addEventListener('change', function (e) { prefs.mix = e.target.checked; savePrefs(); renderSetup(); });
-  $('#timed').addEventListener('change', function (e) { prefs.timed = e.target.checked; savePrefs(); renderSetup(); });
+  ['mix', 'fresh', 'timed', 'fx'].forEach(function (id) {
+    $('#' + id).addEventListener('change', function (e) { prefs[id] = e.target.checked; savePrefs(); renderSetup(); });
+  });
 
   var resetTimer = null;
   $('#resetBtn').addEventListener('click', function () {
     var btn = $('#resetBtn');
     if (resetTimer) {
       clearTimeout(resetTimer); resetTimer = null;
-      prog = {}; store.del('tec-prog');
+      prog = {}; store.del('tec-prog'); store.del('tec-best');
       btn.textContent = 'Effacer mes progrès';
       renderSetup();
       return;
@@ -412,43 +572,88 @@ button, input { font: inherit; color: inherit; }
     resetTimer = setTimeout(function () { resetTimer = null; btn.textContent = 'Effacer mes progrès'; }, 4000);
   });
 
+  /* ---------- Cartes difficiles ---------- */
+  var hardDeck = [];
+  function renderHard() {
+    var list = Object.keys(prog)
+      .filter(function (k) { return /^\d+x\d+$/.test(k) && prog[k].miss > 0; })
+      .map(function (k) { var p = k.split('x'); return { k: k, a: +p[0], b: +p[1], miss: prog[k].miss, ok: acquired(k) }; })
+      .sort(function (x, y) { return (x.ok - y.ok) || (y.miss - x.miss); })
+      .slice(0, 20);
+    var ul = $('#hardList');
+    ul.innerHTML = '';
+    list.forEach(function (h) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="eq">' + h.a + ' × ' + h.b + ' = ' + h.a * h.b + '</span>' +
+        '<span class="miss">ratée ' + h.miss + ' fois</span>' +
+        '<span class="pill ' + (h.ok ? 'ok' : 'ko') + '">' + (h.ok ? 'Acquise' : 'À travailler') + '</span>';
+      ul.appendChild(li);
+    });
+    var todo = list.filter(function (h) { return !h.ok; });
+    hardDeck = (todo.length ? todo : list).slice(0, 10);
+    $('#hardIntro').textContent = list.length
+      ? 'Les cartes que tu as le plus souvent ratées. Une carte redevient « acquise » après deux bonnes réponses de suite.'
+      : 'Aucune carte ratée pour l\'instant. Joue quelques parties et les cartes difficiles apparaîtront ici.';
+    $('#hardPlay').hidden = !hardDeck.length;
+    $('#hardPlay').textContent = 'S\'entraîner sur ' + (hardDeck.length > 1 ? 'ces ' + hardDeck.length + ' cartes' : 'cette carte');
+  }
+  $('#hardBtn').addEventListener('click', function () { renderHard(); show('hard'); });
+  $('#hardBack').addEventListener('click', function () { renderSetup(); show('setup'); });
+  $('#hardPlay').addEventListener('click', function () {
+    startSession(hardDeck.map(function (h) { return makeCard(h.a, h.b); }), false);
+  });
+
   /* ---------- Séance ---------- */
   var S = null;
-  var card = $('#card'), actions = $('#actions'), feedback = $('#feedback');
+  var card = $('#card'), actions = $('#actions'), feedback = $('#feedback'), pad = $('#pad'), answerBox = $('#answer');
 
-  var TIME_LIMIT = 60000;
   function clearTimer() { if (S && S.timer) { clearInterval(S.timer); S.timer = null; } }
 
   function startSession(deck, timed) {
     clearTimer();
-    S = { queue: shuffle(deck.slice()), source: deck.slice(), total: deck.length, known: 0, tries: 0, missed: {}, phase: 'ask', lastOk: false, timed: !!timed, endAt: 0, timer: null, done: false };
+    S = {
+      queue: shuffle(deck.slice()), source: deck.slice(), total: deck.length,
+      known: 0, tries: 0, missed: {}, phase: 'ask', lastOk: false, autoNext: false, typed: '',
+      timed: !!timed, endAt: 0, timer: null, done: false
+    };
     show('play');
     if (S.timed) showReady(); else showCard();
   }
 
-  function showReady() {
+  function setCard(tag, front, back, ans, tip) {
     card.classList.add('noanim');
     card.classList.remove('flipped', 'ok', 'ko');
-    $('#tag').textContent = 'Défi chrono';
-    $('#q').textContent = 'Prêt ?';
-    $('#q2').textContent = '';
-    $('#ans').textContent = '';
-    $('#tip').innerHTML = '';
+    $('#tag').textContent = tag;
+    $('#q').textContent = front;
+    $('#q').classList.toggle('long', front.length > 7);
+    $('#q2').textContent = back;
+    $('#ans').textContent = ans;
+    $('#tip').innerHTML = tip;
+    $('#front').removeAttribute('aria-hidden');
+    $('#back').setAttribute('aria-hidden', 'true');
     void card.offsetWidth;
     card.classList.remove('noanim');
+  }
+  function flip(result) {
+    card.classList.add('flipped');
+    if (result) card.classList.add(result);
+    $('#front').setAttribute('aria-hidden', 'true');
+    $('#back').removeAttribute('aria-hidden');
+  }
+
+  function showReady() {
+    setCard('Défi chrono', 'Prêt ?', '', '', '');
     feedback.textContent = 'Trouve un maximum de bonnes réponses en 1 minute.';
     feedback.className = 'feedback';
     S.phase = 'ready';
     updateMeter(TIME_LIMIT);
     renderActions();
   }
-
   function startClock() {
     S.endAt = Date.now() + TIME_LIMIT;
     S.timer = setInterval(tick, 200);
     showCard();
   }
-
   function tick() {
     if (!S || !S.timed || !S.endAt || S.done) return;
     var left = S.endAt - Date.now();
@@ -484,53 +689,64 @@ button, input { font: inherit; color: inherit; }
 
   function showCard() {
     if (!S.queue.length) {
-      if (S.timed) S.queue = shuffle(S.source.map(function (x) { return { k: x.k, a: x.a, b: x.b }; }));
+      if (S.timed) S.queue = shuffle(S.source.map(copyCard));
       else return finish();
     }
     var c = S.queue[0];
-    card.classList.add('noanim');
-    card.classList.remove('flipped', 'ok', 'ko');
-    $('#q').textContent = c.a + ' × ' + c.b;
-    $('#tag').textContent = 'Combien font…';
-    $('#q2').textContent = c.a + ' × ' + c.b + ' =';
-    $('#ans').textContent = c.a * c.b;
-    $('#tip').innerHTML = tipFor(c.a, c.b);
-    void card.offsetWidth;
-    card.classList.remove('noanim');
+    var q = question(c);
+    setCard(c.kind === 'missing' ? 'Quel nombre manque ?' : 'Combien font…', q, c.kind === 'missing' ? q : q + ' =', answerOf(c), tipFor(c));
     feedback.textContent = '';
     feedback.className = 'feedback';
     S.phase = 'ask';
+    S.typed = '';
+    S.autoNext = false;
     updateMeter();
     renderActions();
   }
 
   function renderActions() {
+    var typing = prefs.mode === 'type';
+    views.play.classList.toggle('typing', typing && S.phase !== 'ready');
+    pad.hidden = !(typing && (S.phase === 'ask' || S.autoNext));
+    pad.classList.toggle('locked', S.phase !== 'ask');
+
+    var html = '';
     if (S.phase === 'ready') {
-      actions.innerHTML = '<button class="btn sun big" type="button" data-act="go">Lancer le chrono (1 min)</button>';
-      actions.querySelector('[data-act]').focus({ preventScroll: true });
-      return;
+      html = '<button class="btn sun big" type="button" data-act="go">Lancer le chrono (1 min)</button>';
+    } else if (!typing) {
+      html = S.phase === 'ask'
+        ? '<button class="btn primary big" type="button" data-act="reveal">Montrer la réponse</button>'
+        : '<button class="btn bad" type="button" data-act="review">À revoir</button><button class="btn good" type="button" data-act="know">Je le savais !</button>';
+    } else if (!S.autoNext && S.phase === 'revealed') {
+      html = '<button class="btn primary big" type="button" data-act="next">Carte suivante</button>';
     }
-    if (prefs.mode === 'flip') {
-      if (S.phase === 'ask') {
-        actions.innerHTML = '<button class="btn primary big" type="button" data-act="reveal">Montrer la réponse</button>';
-      } else {
-        actions.innerHTML = '<button class="btn bad" type="button" data-act="review">À revoir</button><button class="btn good" type="button" data-act="know">Je le savais !</button>';
-      }
-    } else {
-      if (S.phase === 'ask') {
-        actions.innerHTML = '<form id="answerForm" autocomplete="off"><label class="sr" for="answer">Ta réponse</label><input id="answer" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="?"><button class="btn primary" type="submit">Valider</button></form>';
-      } else {
-        actions.innerHTML = '<button class="btn primary big" type="button" data-act="next">Carte suivante</button>';
-      }
+    actions.innerHTML = html;
+    actions.hidden = !html;
+
+    if (typing && S.phase === 'ask') {
+      renderAnswer();
+      if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     }
-    var focusTarget = actions.querySelector('input') || actions.querySelector('[data-act="know"]') || actions.querySelector('[data-act]');
-    if (focusTarget) focusTarget.focus({ preventScroll: true });
+    var target = actions.querySelector('[data-act="know"]') || actions.querySelector('[data-act]');
+    if (target) target.focus({ preventScroll: true });
+  }
+
+  function renderAnswer() {
+    answerBox.textContent = S.typed || '?';
+    answerBox.classList.toggle('empty', !S.typed);
+  }
+  function typeKey(k) {
+    if (!S || S.phase !== 'ask' || prefs.mode !== 'type') return;
+    if (k === 'ok') { if (S.typed) check(S.typed); return; }
+    if (k === 'del') S.typed = S.typed.slice(0, -1);
+    else if (S.typed.length < 3) S.typed = (S.typed + k).replace(/^0+(?=\d)/, '');
+    renderAnswer();
   }
 
   function reveal() {
     if (S.phase !== 'ask') return;
     S.phase = 'revealed';
-    card.classList.add('flipped');
+    flip();
     renderActions();
   }
   function know() {
@@ -543,7 +759,7 @@ button, input { font: inherit; color: inherit; }
   function review() {
     var c = S.queue.shift();
     record(c.k, false);
-    S.missed[c.k] = { k: c.k, a: c.a, b: c.b };
+    S.missed[c.id] = copyCard(c);
     S.tries += 1;
     var at = Math.min(S.queue.length, 2 + Math.floor(Math.random() * 3));
     S.queue.splice(at, 0, c);
@@ -551,11 +767,12 @@ button, input { font: inherit; color: inherit; }
   }
   function check(raw) {
     var c = S.queue[0];
-    var v = parseInt(String(raw).trim(), 10);
-    if (isNaN(v)) { var el = $('#answer'); if (el) el.focus(); return; }
-    S.lastOk = v === c.a * c.b;
+    var v = parseInt(raw, 10);
+    if (isNaN(v)) return;
+    S.lastOk = v === answerOf(c);
     S.phase = 'revealed';
-    card.classList.add('flipped', S.lastOk ? 'ok' : 'ko');
+    S.autoNext = S.timed && S.lastOk;
+    flip(S.lastOk ? 'ok' : 'ko');
     if (S.lastOk) {
       var yes = ['Bravo !', 'Exact !', 'Bien joué !', 'Oui, c\'est ça !'];
       feedback.textContent = yes[Math.floor(Math.random() * yes.length)];
@@ -564,12 +781,13 @@ button, input { font: inherit; color: inherit; }
       feedback.textContent = 'Pas tout à fait : tu as écrit ' + v + '. Cette carte reviendra.';
       feedback.className = 'feedback ko';
     }
+    sound(S.lastOk ? 'ok' : 'ko');
     renderActions();
-    if (S.timed && S.lastOk) {
+    if (S.autoNext) {
       var sess = S, cur = c;
       setTimeout(function () {
         if (S === sess && !S.done && S.queue[0] === cur && S.phase === 'revealed') know();
-      }, 700);
+      }, 600);
     }
   }
 
@@ -580,13 +798,24 @@ button, input { font: inherit; color: inherit; }
     var act = b.dataset.act;
     if (act === 'go') startClock();
     else if (act === 'reveal') reveal();
-    else if (act === 'know') know();
+    else if (act === 'know') { sound('ok'); know(); }
     else if (act === 'review') review();
     else if (act === 'next') { if (S.lastOk) know(); else review(); }
   });
-  actions.addEventListener('submit', function (e) {
+  // Le pavé ne prend pas le focus : Entrée reste réservée à « OK ».
+  pad.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  pad.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-key]');
+    if (b) typeKey(b.dataset.key);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!S || views.play.hidden || prefs.mode !== 'type' || S.phase !== 'ask') return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/^[0-9]$/.test(e.key)) typeKey(e.key);
+    else if (e.key === 'Backspace') typeKey('del');
+    else if (e.key === 'Enter' && !e.target.closest('button')) typeKey('ok');
+    else return;
     e.preventDefault();
-    check($('#answer').value);
   });
   $('#quit').addEventListener('click', function () { clearTimer(); S = null; renderSetup(); show('setup'); });
 
@@ -595,44 +824,53 @@ button, input { font: inherit; color: inherit; }
     if (S.done) return;
     S.done = true;
     clearTimer();
-    var missed = Object.keys(S.missed).map(function (k) { return S.missed[k]; });
-    var first = S.total - missed.length;
-    var ratio = S.total ? first / S.total : 1;
-    var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1;
-    var titles = ['', 'Continue, ça vient !', 'Bien joué !', 'Superbe !'];
-    var starHtml = '';
-    for (var i = 1; i <= 3; i++) starHtml += '<span class="' + (i <= stars ? 'on' : '') + '">★</span>';
-    $('#stars').innerHTML = starHtml;
-    $('#doneTitle').textContent = titles[stars];
-    $('#doneText').textContent = first + ' carte' + (first > 1 ? 's' : '') + ' sur ' + S.total + ' du premier coup.';
-    $('#stars').hidden = !!S.timed;
+    var missed = Object.keys(S.missed).map(function (id) { return S.missed[id]; });
+    var title, text, celebrate;
+
     if (S.timed) {
       var bests = store.get('tec-best', {});
-      var prev = bests[prefs.mode] || 0;
+      var prev = bests[bestKey()] || 0;
       var isRecord = S.known > prev;
-      if (isRecord) { bests[prefs.mode] = S.known; store.set('tec-best', bests); }
-      $('#doneTitle').textContent = S.known === 0 ? 'Le temps est écoulé !' : S.known + (S.known > 1 ? ' bonnes réponses !' : ' bonne réponse !');
-      var recordText = isRecord ? (prev ? ' Nouveau record ! Avant : ' + prev + '.' : ' Premier record enregistré !') : (prev ? ' Ton record : ' + prev + '.' : '');
-      $('#doneText').textContent = 'Tu as vu ' + S.tries + ' carte' + (S.tries > 1 ? 's' : '') + ' en 1 minute.' + recordText;
+      if (isRecord) { bests[bestKey()] = S.known; store.set('tec-best', bests); }
+      title = S.known === 0 ? 'Le temps est écoulé !' : S.known + (S.known > 1 ? ' bonnes réponses !' : ' bonne réponse !');
+      text = 'Tu as vu ' + S.tries + ' carte' + (S.tries > 1 ? 's' : '') + ' en 1 minute.' +
+        (isRecord ? (prev ? ' Nouveau record ! Avant : ' + prev + '.' : ' Premier record enregistré !') : (prev ? ' Ton record : ' + prev + '.' : ''));
+      celebrate = isRecord;
+    } else {
+      var first = S.total - missed.length;
+      var ratio = S.total ? first / S.total : 1;
+      var stars = ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1;
+      var starHtml = '';
+      for (var i = 1; i <= 3; i++) starHtml += '<span class="' + (i <= stars ? 'on' : '') + '">★</span>';
+      $('#stars').innerHTML = starHtml;
+      title = ['', 'Continue, ça vient !', 'Bien joué !', 'Superbe !'][stars];
+      text = first + ' carte' + (first > 1 ? 's' : '') + ' sur ' + S.total + ' du premier coup.';
+      celebrate = stars === 3;
     }
+    $('#stars').hidden = S.timed;
+    $('#doneTitle').textContent = title;
+    $('#doneText').textContent = text;
+
     var list = $('#misses');
     list.innerHTML = '';
     missed.forEach(function (m) {
       var li = document.createElement('li');
-      li.textContent = m.a + ' × ' + m.b + ' = ' + (m.a * m.b);
+      li.textContent = solution(m);
       list.appendChild(li);
     });
     $('#missPanel').hidden = missed.length === 0;
     $('#againMiss').hidden = missed.length === 0;
+    $('#againAll').textContent = S.timed ? 'Relancer le chrono' : 'Rejouer une partie';
     S.retry = missed;
-    $('#againAll').textContent = S.timed ? 'Relancer le chrono' : 'Rejouer toutes les cartes';
     show('done');
+    if (celebrate) { sound('win'); confetti(); }
   }
-  $('#againMiss').addEventListener('click', function () {
-    var deck = S.retry.map(function (m) { return { k: m.k, a: m.a, b: m.b }; });
-    startSession(deck, false);
+  $('#againMiss').addEventListener('click', function () { startSession(S.retry.map(copyCard), false); });
+  $('#againAll').addEventListener('click', function () {
+    var deck = buildDeck(prefs.tables);
+    if (!deck.length) { renderSetup(); show('setup'); return; }
+    startSession(deck, S.timed);
   });
-  $('#againAll').addEventListener('click', function () { startSession(buildDeck(prefs.tables), prefs.timed); });
   $('#backBtn').addEventListener('click', function () { renderSetup(); show('setup'); });
   $('#startBtn').addEventListener('click', function () {
     var deck = buildDeck(prefs.tables);
@@ -640,6 +878,10 @@ button, input { font: inherit; color: inherit; }
   });
 
   renderSetup();
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
 })();
 </script>
 </body>
