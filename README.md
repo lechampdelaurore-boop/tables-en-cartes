@@ -15,7 +15,7 @@ Flashcards pour apprendre les tables de multiplication de 2 à 12.
 - Option pour ne travailler que les cartes pas encore acquises.
 - Écran « Mes cartes difficiles » : les cartes les plus souvent ratées, avec un entraînement ciblé.
 - Défi chrono : 1 minute pour trouver un maximum de réponses, avec un record par exercice et par mode.
-- Sons et confettis pour les records et les séries parfaites (désactivables).
+- Récompenses animées : étoiles, rebond de la carte et une créature (15 petits dragons, fées et compagnons) à chaque bonne réponse ; la carte secoue la tête en cas d'erreur. Sons et confettis pour les séries et les records. Tout se désactive avec l'option « Sons et animations ».
 - S'installe sur l'écran d'accueil d'un téléphone ou d'une tablette et fonctionne hors ligne.
 
 Les progrès restent dans le navigateur de l'appareil : aucun compte, et rien n'est envoyé sur internet.

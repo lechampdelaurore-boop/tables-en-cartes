@@ -227,12 +227,64 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .confetti i { position: absolute; top: -16px; width: 10px; height: 14px; border-radius: 2px; animation: fall linear forwards; }
 @keyframes fall { to { transform: translate(var(--dx), 110vh) rotate(var(--r)); } }
 
+/* Bonne réponse : la carte rebondit et des étoiles jaillissent */
+.scene { position: relative; }
+.scene.pop { animation: pop .5s .15s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes pop { 40% { transform: scale(1.07); } }
+.feedback.ok, .feedback.ko { animation: bump .4s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes bump { from { transform: scale(.6); opacity: 0; } }
+.burst { position: fixed; width: 0; height: 0; pointer-events: none; z-index: 40; }
+.burst i, .burst b { position: absolute; left: 0; top: 0; font-style: normal; line-height: 1; }
+.burst i { font-size: var(--s); color: var(--c); -webkit-text-stroke: 1.5px #16204A; animation: burst .8s cubic-bezier(.2, .8, .3, 1) forwards; }
+@keyframes burst {
+  from { transform: translate(-50%, -50%) scale(.3); opacity: 1; }
+  70% { opacity: 1; }
+  to { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r)); opacity: 0; }
+}
+.burst b { font-family: var(--display); font-weight: 700; font-size: 2rem; color: var(--good); -webkit-text-stroke: 1.5px #16204A; animation: plus .9s ease-out forwards; }
+@keyframes plus {
+  from { transform: translate(-50%, -20%) scale(.5); opacity: 0; }
+  25% { transform: translate(-50%, -80%) scale(1.15); opacity: 1; }
+  to { transform: translate(-50%, -260%); opacity: 0; }
+}
+
+/* Erreur : la carte secoue la tête et la mascotte vient consoler */
+.scene.shake { animation: shake .5s ease-in-out; }
+@keyframes shake {
+  20% { transform: translateX(-10px) rotate(-1.5deg); }
+  40% { transform: translateX(8px) rotate(1deg); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(3px); }
+}
+
+/* Créature de récompense : couleurs fixes, lisibles en thème clair comme sombre */
+.buddy {
+  position: absolute; right: -12px; bottom: -44px; width: 116px; height: 116px; z-index: 5; pointer-events: none;
+  opacity: 0; transform: translateY(24px) scale(.5); transform-origin: 50% 100%;
+  transition: opacity .2s, transform .4s cubic-bezier(.3, 1.6, .5, 1);
+}
+.buddy.on { opacity: 1; transform: none; }
+.buddy svg { display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 90%; }
+.buddy.on svg { animation: hop .8s .25s ease-in-out 2; }
+@keyframes hop { 30% { transform: translateY(-14px) rotate(-6deg); } 60% { transform: rotate(4deg); } }
+.bubble {
+  position: absolute; right: 86px; bottom: 84px; padding: 6px 12px; white-space: nowrap;
+  background: #FFFFFF; color: #16204A; border: 3px solid #16204A; border-radius: 16px; box-shadow: 0 4px 0 #16204A;
+  font-family: var(--display); font-weight: 700; font-size: 1.1rem;
+}
+.bubble::after {
+  content: ''; position: absolute; right: -9px; bottom: 6px; width: 12px; height: 12px;
+  background: #FFFFFF; border: solid #16204A; border-width: 3px 3px 0 0; transform: rotate(45deg);
+}
+
 @media (max-width: 400px) {
   .minis { display: none; }
   .actions .btn { font-size: 1.05rem; padding-inline: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .card, .meter i, .chip, .btn, .key { transition: none; }
+  .scene.pop, .scene.shake, .feedback.ok, .feedback.ko, .buddy svg { animation: none !important; }
+  .buddy { transition: opacity .2s; transform: none; }
 }
 </style>
 </head>
@@ -280,7 +332,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
           <label class="switch" for="mix"><input type="checkbox" id="mix"><span>Parfois inverser (7 × 8 ou 8 × 7)</span></label>
           <label class="switch" for="fresh"><input type="checkbox" id="fresh"><span>Seulement les cartes pas encore acquises</span></label>
           <label class="switch" for="timed"><input type="checkbox" id="timed"><span>Défi chrono : 1 minute pour trouver un maximum de réponses</span></label>
-          <label class="switch" for="fx"><input type="checkbox" id="fx"><span>Sons et confettis</span></label>
+          <label class="switch" for="fx"><input type="checkbox" id="fx"><span>Sons et animations</span></label>
         </div>
       </div>
 
@@ -318,6 +370,10 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
             <p class="a" id="ans"></p>
             <p class="tip" id="tip"></p>
           </div>
+        </div>
+        <div class="buddy" id="buddy" aria-hidden="true">
+          <div class="bubble" id="bubble" hidden></div>
+          <svg viewBox="0 0 100 100" id="buddyArt"></svg>
         </div>
       </div>
       <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
@@ -501,6 +557,133 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
     document.body.appendChild(box);
     setTimeout(function () { box.remove(); }, 3600);
   }
+  function stars() {
+    if (!prefs.fx || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var r = $('#card').getBoundingClientRect();
+    var box = document.createElement('div');
+    box.className = 'burst';
+    box.setAttribute('aria-hidden', 'true');
+    box.style.left = r.left + r.width / 2 + 'px';
+    box.style.top = r.top + r.height / 2 + 'px';
+    var colors = ['var(--sun)', 'var(--sun)', 'var(--good)', 'var(--accent)'];
+    for (var i = 0; i < 14; i++) {
+      var p = document.createElement('i'), ang = (i / 14) * Math.PI * 2 + Math.random() * 0.4, dist = 110 + Math.random() * 70;
+      p.textContent = '★';
+      p.style.setProperty('--c', colors[i % colors.length]);
+      p.style.setProperty('--s', 18 + Math.random() * 16 + 'px');
+      p.style.setProperty('--x', Math.cos(ang) * dist + 'px');
+      p.style.setProperty('--y', Math.sin(ang) * dist * 0.8 + 'px');
+      p.style.setProperty('--r', Math.random() * 360 - 180 + 'deg');
+      box.appendChild(p);
+    }
+    var plus = document.createElement('b');
+    plus.textContent = '+1';
+    box.appendChild(plus);
+    document.body.appendChild(box);
+    setTimeout(function () { box.remove(); }, 1000);
+  }
+  // Relance une animation CSS même si la classe est déjà là.
+  function replay(el, cls) {
+    el.classList.remove('pop', 'shake');
+    void el.offsetWidth;
+    el.classList.add(cls);
+  }
+
+  /* ---------- Créatures de récompense ---------- */
+  // Dessins en viewBox 100 × 100, contour commun ajouté par showCreature().
+  var INK = '#2B2340';
+  function eyes(y, g, r) {
+    return [50 - g, 50 + g].map(function (x) {
+      return '<ellipse cx="' + x + '" cy="' + y + '" rx="' + r + '" ry="' + r * 1.15 + '" fill="' + INK + '"/>' +
+        '<circle cx="' + (x - r * 0.35) + '" cy="' + (y - r * 0.4) + '" r="' + r * 0.4 + '" fill="#fff"/>' +
+        '<circle cx="' + (x + r * 0.35) + '" cy="' + (y + r * 0.4) + '" r="' + r * 0.16 + '" fill="#fff"/>';
+    }).join('');
+  }
+  function blush(y, g) {
+    return '<ellipse cx="' + (50 - g) + '" cy="' + y + '" rx="4" ry="2.5" fill="#FF8FA8" opacity=".75"/>' +
+      '<ellipse cx="' + (50 + g) + '" cy="' + y + '" rx="4" ry="2.5" fill="#FF8FA8" opacity=".75"/>';
+  }
+  function smile(y, w) {
+    w = w || 4;
+    return '<path d="M' + (50 - w) + ' ' + y + 'q' + w + ' ' + w + ' ' + 2 * w + ' 0" fill="none" stroke-width="2.2"/>';
+  }
+  function face(y, g, r, by, bg, my) { return '<g stroke="none">' + eyes(y, g, r) + blush(by, bg) + '</g>' + smile(my); }
+  function dragon(c, belly, wing, top, tip) {
+    return '<path d="M66 72q20 4 18-12q-6 6-16 4z" fill="' + c + '"/>' + tip +
+      '<path d="M32 48q-20-14-18 6q6-3 9 3q3-5 9-2z" fill="' + wing + '"/><path d="M68 48q20-14 18 6q-6-3-9 3q-3-5-9-2z" fill="' + wing + '"/>' +
+      '<ellipse cx="40" cy="81" rx="6" ry="4" fill="' + c + '"/><ellipse cx="60" cy="81" rx="6" ry="4" fill="' + c + '"/>' +
+      '<circle cx="50" cy="60" r="22" fill="' + c + '"/><ellipse cx="50" cy="69" rx="13" ry="10" fill="' + belly + '"/>' + top + face(56, 9, 4.5, 63, 15, 64);
+  }
+  function fairy(dress, hair, wing, extra) {
+    return '<g fill="' + wing + '" opacity=".9"><ellipse cx="33" cy="50" rx="14" ry="8" transform="rotate(-30 33 50)"/><ellipse cx="67" cy="50" rx="14" ry="8" transform="rotate(30 67 50)"/>' +
+      '<ellipse cx="36" cy="64" rx="10" ry="6" transform="rotate(25 36 64)"/><ellipse cx="64" cy="64" rx="10" ry="6" transform="rotate(-25 64 64)"/></g>' +
+      '<path d="M50 56q-20 18-16 26q8-4 16 0q8-4 16 0q4-8-16-26z" fill="' + dress + '"/>' +
+      '<circle cx="50" cy="44" r="15" fill="#FFE0CC"/><path d="M35 44q0-18 15-18q15 0 15 18q-4-8-15-9q-11 1-15 9z" fill="' + hair + '"/>' + extra + face(46, 6, 3.5, 51, 10, 51);
+  }
+  var CREATURES = [
+    ['Braisou', dragon('#F2603C', '#FFE3B8', '#FF9F7A', '<path d="M38 41l-3-10l8 5z M62 41l3-10l-8 5z" fill="#FFE3B8"/>', '<path d="M84 60q-7-8 0-15q7 7 0 15z" fill="#FFC93C"/>')],
+    ['Givrine', dragon('#8FD3F4', '#E8F7FF', '#C5ECFF', '<path d="M42 40l3-11l4 10z M50 38l3-12l3 12z M58 40l-3-11l-4 10z" fill="#E8F7FF"/>', '<path d="M84 52l4 7l-4 7l-4-7z" fill="#E8F7FF"/>')],
+    ['Fleurette', fairy('#FF9EC4', '#A8723C', '#D9F2FF', '<circle cx="62" cy="31" r="4" fill="#FFC93C"/>')],
+    ['Étincelle', fairy('#B79CFF', '#5B4BB7', '#FFF1B8', '<path d="M70 70l10-16"/><path d="M80 47l2 5l5 0l-4 3l2 5l-5-3l-5 3l2-5l-4-3l5 0z" fill="#FFC93C"/>')],
+    ['Lumio', '<circle cx="50" cy="58" r="30" fill="#FFF3B0" stroke="none" opacity=".7"/><path d="M42 38q-6-12-12-10M58 38q6-12 12-10" fill="none"/><circle cx="30" cy="28" r="3" fill="#FFE066"/><circle cx="70" cy="28" r="3" fill="#FFE066"/>' +
+      '<circle cx="50" cy="58" r="20" fill="#FFE066"/><ellipse cx="34" cy="44" rx="10" ry="6" fill="#E8F7FF" transform="rotate(-35 34 44)"/><ellipse cx="66" cy="44" rx="10" ry="6" fill="#E8F7FF" transform="rotate(35 66 44)"/>' + face(57, 7, 4, 63, 12, 63)],
+    ['Moussu', '<path d="M50 38v-10" fill="none"/><path d="M50 30q-10-8-14 0q8 4 14 0z" fill="#A6DD7A"/><path d="M50 28q10-10 15-2q-8 5-15 2z" fill="#A6DD7A"/>' +
+      '<ellipse cx="40" cy="82" rx="6" ry="4" fill="#5FAE55"/><ellipse cx="60" cy="82" rx="6" ry="4" fill="#5FAE55"/><circle cx="50" cy="60" r="23" fill="#7CC46A"/>' +
+      '<g stroke="none" fill="#5FAE55"><circle cx="36" cy="50" r="3"/><circle cx="64" cy="72" r="3.5"/><circle cx="62" cy="47" r="2"/></g>' + face(58, 8, 4.5, 65, 14, 65)],
+    ['Champi', '<rect x="37" y="50" width="26" height="31" rx="11" fill="#FFF1DC"/><path d="M24 56q0-30 26-30q26 0 26 30q-26 6-52 0z" fill="#F25C54"/>' +
+      '<g stroke="none" fill="#fff"><circle cx="38" cy="40" r="4"/><circle cx="56" cy="34" r="3"/><circle cx="66" cy="47" r="3.5"/></g>' + face(65, 6, 3.5, 71, 10, 72)],
+    ['Nuagine', '<g fill="#fff"><circle cx="34" cy="60" r="14"/><circle cx="50" cy="50" r="18"/><circle cx="66" cy="60" r="14"/><ellipse cx="50" cy="66" rx="25" ry="12"/></g>' +
+      '<g fill="#fff" stroke="none"><circle cx="34" cy="60" r="12.8"/><circle cx="50" cy="50" r="16.8"/><circle cx="66" cy="60" r="12.8"/><ellipse cx="50" cy="66" rx="23.8" ry="10.8"/></g>' +
+      '<path d="M74 76l-5 7h5l-4 7" fill="none" stroke="#FFC93C" stroke-width="3"/>' + face(56, 8, 4, 62, 14, 63)],
+    ['Licorneau', '<path d="M46 37l4-18l4 18z" fill="#FFC93C"/><path d="M32 44l-2-12l10 6z M68 44l2-12l-10 6z" fill="#fff"/><circle cx="50" cy="57" r="22" fill="#fff"/>' +
+      '<circle cx="34" cy="40" r="6" fill="#FFB3D9"/><circle cx="42" cy="35" r="5" fill="#B7A3FF"/><circle cx="58" cy="35" r="5" fill="#9EE6E0"/><ellipse cx="50" cy="68" rx="12" ry="8" fill="#FFE6F0"/>' +
+      '<g stroke="none" fill="' + INK + '"><circle cx="46" cy="67" r="1.4"/><circle cx="54" cy="67" r="1.4"/></g><g stroke="none">' + eyes(54, 10, 4.5) + blush(61, 17) + '</g>' + smile(71, 3)],
+    ['Hibulle', '<path d="M78 18a9 9 0 1 0 7 14a7 7 0 1 1-7-14z" fill="#FFE066"/><path d="M32 42l2-13l9 8z M68 42l-2-13l-9 8z" fill="#8C7AE6"/>' +
+      '<ellipse cx="28" cy="64" rx="6" ry="12" fill="#7564CF"/><ellipse cx="72" cy="64" rx="6" ry="12" fill="#7564CF"/><ellipse cx="50" cy="60" rx="22" ry="24" fill="#8C7AE6"/>' +
+      '<ellipse cx="50" cy="70" rx="13" ry="11" fill="#E4DEFF"/><circle cx="41" cy="52" r="8" fill="#fff"/><circle cx="59" cy="52" r="8" fill="#fff"/>' +
+      '<g stroke="none">' + eyes(52, 9, 4) + '</g><path d="M47 60l3 4l3-4z" fill="#FFC93C" stroke-width="1.5"/>'],
+    ['Galet', '<ellipse cx="24" cy="66" rx="6" ry="10" fill="#A8A3B8"/><ellipse cx="76" cy="66" rx="6" ry="10" fill="#A8A3B8"/><rect x="28" y="40" width="44" height="42" rx="16" fill="#BDB8CC"/>' +
+      '<path d="M30 52q2-14 20-12q18-2 20 12q-6-4-10 0q-4-5-10-1q-6-4-10 1q-4-4-10 0z" fill="#7CC46A"/><circle cx="58" cy="40" r="3" fill="#FF9EC4"/>' +
+      '<path d="M64 70l3 4" fill="none" stroke-width="1.8"/>' + face(60, 8, 4, 67, 14, 68)],
+    ['Grifon', '<path d="M68 70q14 0 12-12" fill="none" stroke-width="3"/><circle cx="80" cy="56" r="4" fill="#E0A44A"/><ellipse cx="50" cy="64" rx="20" ry="18" fill="#F5C46B"/>' +
+      '<path d="M32 60q-16-10-14 8q8 2 14-2z M68 60q16-10 14 8q-8 2-14-2z" fill="#fff"/><path d="M44 31l2-7l3 6l3-7l2 8" fill="#fff"/><circle cx="50" cy="44" r="15" fill="#fff"/>' +
+      '<g stroke="none">' + eyes(42, 6, 3.5) + blush(48, 11) + '</g><path d="M46 47l4 6l4-6z" fill="#FFA43C" stroke-width="1.8"/>'],
+    ['Phénixou', '<path d="M44 74q-6 14-14 14q6-6 6-12z M56 74q6 14 14 14q-6-6-6-12z M50 76q0 14-4 18q8-4 8-18z" fill="#FF5470"/>' +
+      '<path d="M50 40q-4-12 0-18q4 6 0 18z M44 42q-8-8-6-14q6 4 6 14z M56 42q8-8 6-14q-6 4-6 14z" fill="#FFC93C"/>' +
+      '<path d="M32 56q-18-4-16 12q10-2 16-4z M68 56q18-4 16 12q-10-2-16-4z" fill="#FFB347"/><circle cx="50" cy="58" r="19" fill="#FF7A45"/><ellipse cx="50" cy="66" rx="10" ry="8" fill="#FFD9A8"/>' +
+      '<g stroke="none">' + eyes(54, 7, 4) + blush(61, 13) + '</g><path d="M47 60l3 4l3-4z" fill="#FFC93C" stroke-width="1.5"/>'],
+    ['Mimic', '<rect x="26" y="52" width="48" height="30" rx="5" fill="#B5763A"/><rect x="28" y="46" width="44" height="9" fill="#4A2033"/>' +
+      '<path d="M32 46l3 5l3-5z M62 46l3 5l3-5z" fill="#fff" stroke-width="1.2"/><ellipse cx="50" cy="53" rx="8" ry="5" fill="#FF8FA8" stroke-width="1.8"/>' +
+      '<path d="M26 46q0-18 24-18q24 0 24 18z" fill="#C98A4B"/><rect x="45" y="58" width="10" height="10" rx="2" fill="#FFC93C"/><path d="M26 46h48" fill="none"/>' +
+      '<g stroke="none">' + eyes(39, 9, 4) + blush(43, 16) + '</g>'],
+    ['Bulline', '<g fill="#CFEFFF" stroke-width="1.6"><circle cx="20" cy="40" r="4"/><circle cx="80" cy="34" r="3"/><circle cx="82" cy="60" r="5"/></g>' +
+      '<path d="M50 24q22 26 22 40a22 22 0 0 1-44 0q0-14 22-40z" fill="#6EC6FF"/><ellipse cx="40" cy="52" rx="4" ry="7" fill="#fff" opacity=".6" stroke="none" transform="rotate(20 40 52)"/>' + face(64, 8, 4.5, 71, 14, 72)]
+  ];
+
+  // Tirage dans un sac mélangé : chaque créature passe avant qu'une autre revienne.
+  var bag = [], lastCreature = null, buddyTimer = null;
+  function nextCreature() {
+    if (!bag.length) {
+      bag = shuffle(CREATURES.slice());
+      if (bag[0] === lastCreature) bag.push(bag.shift());
+    }
+    lastCreature = bag.shift();
+    return lastCreature;
+  }
+  function showCreature(text) {
+    if (!prefs.fx) return;
+    var c = nextCreature(), b = $('#buddy'), bubble = $('#bubble');
+    $('#buddyArt').innerHTML = '<g stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">' + c[1] + '</g>';
+    bubble.textContent = text || '';
+    bubble.hidden = !text;
+    b.classList.remove('on');
+    void b.offsetWidth;
+    b.classList.add('on');
+    clearTimeout(buddyTimer);
+    buddyTimer = setTimeout(function () { b.classList.remove('on'); }, text ? 2200 : 1500);
+  }
+  function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
+  var CHEERS = ['Trop fort !', 'Quelle série !', 'Champion !', 'Incroyable !'];
 
   /* ---------- Écrans ---------- */
   var views = { setup: $('#setup'), hard: $('#hard'), play: $('#play'), done: $('#done') };
@@ -613,7 +796,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
     clearTimer();
     S = {
       queue: shuffle(deck.slice()), source: deck.slice(), total: deck.length,
-      known: 0, tries: 0, missed: {}, phase: 'ask', lastOk: false, autoNext: false, typed: '',
+      known: 0, tries: 0, streak: 0, missed: {}, phase: 'ask', lastOk: false, autoNext: false, typed: '',
       timed: !!timed, endAt: 0, timer: null, done: false
     };
     show('play');
@@ -756,6 +939,24 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
     S.tries += 1;
     showCard();
   }
+  // Bonne réponse : étoiles, rebond et une créature ; elle parle aux séries de 3, 5, 10, 15…
+  function cheer() {
+    S.streak += 1;
+    stars();
+    if (prefs.fx) replay($('.scene'), 'pop');
+    var n = S.streak, milestone = n === 3 || n === 5 || (n >= 10 && n % 5 === 0);
+    showCreature(milestone ? n + ' d\'affilée ! ' + pick(CHEERS) : '');
+    if (milestone && n % 10 === 0) confetti();
+  }
+  // Erreur : la carte secoue la tête et le téléphone vibre un court instant.
+  function oops() {
+    S.streak = 0;
+    clearTimeout(buddyTimer);
+    $('#buddy').classList.remove('on');
+    if (!prefs.fx) return;
+    replay($('.scene'), 'shake');
+    if (navigator.vibrate) navigator.vibrate(60);
+  }
   function review() {
     var c = S.queue.shift();
     record(c.k, false);
@@ -782,6 +983,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
       feedback.className = 'feedback ko';
     }
     sound(S.lastOk ? 'ok' : 'ko');
+    if (S.lastOk) cheer(); else oops();
     renderActions();
     if (S.autoNext) {
       var sess = S, cur = c;
@@ -798,8 +1000,8 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
     var act = b.dataset.act;
     if (act === 'go') startClock();
     else if (act === 'reveal') reveal();
-    else if (act === 'know') { sound('ok'); know(); }
-    else if (act === 'review') review();
+    else if (act === 'know') { sound('ok'); cheer(); know(); }
+    else if (act === 'review') { oops(); review(); }
     else if (act === 'next') { if (S.lastOk) know(); else review(); }
   });
   // Le pavé ne prend pas le focus : Entrée reste réservée à « OK ».
