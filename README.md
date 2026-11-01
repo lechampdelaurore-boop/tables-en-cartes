@@ -39,3 +39,4 @@ Le verso des cartes n'a ni bord ni bandeau près du trait de coupe : un petit d�
 - `fonts/` : polices Fredoka et Nunito (licence SIL Open Font License, voir les fichiers `OFL-*.txt`).
 - `imprimer.html` : les cartes à imprimer. Le PDF en est une impression avec le réglage à 0.
 
+- `tests/telephone.cjs` et `.github/workflows/test-telephone.yml` : après chaque mise en ligne, GitHub ouvre le site publié dans Chrome au format téléphone (7 tailles d'écran) et vérifie que l'écran de jeu « je tape » ne défile pas. Résultat et captures dans l'onglet Actions. Lancement local : `npm install --no-save playwright && node tests/telephone.cjs`.
