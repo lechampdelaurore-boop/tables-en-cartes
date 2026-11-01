@@ -17,6 +17,7 @@ Flashcards pour apprendre les tables de multiplication de 2 à 12.
 - Défi chrono : 1 minute pour trouver un maximum de réponses, avec un record par exercice et par mode.
 - Récompenses animées : étoiles, rebond de la carte et une créature (30 petits héros kawaii de fantasy : dragons, fées, chevalier, magicien, elfe, nain…) à chaque bonne réponse ; la carte secoue la tête en cas d'erreur. Sons et confettis pour les séries et les records. Tout se désactive avec l'option « Sons et animations ».
 - S'installe sur l'écran d'accueil d'un téléphone ou d'une tablette et fonctionne hors ligne.
+- Le bouton « 🏠 Mes applis » ramène à la page d'accueil de toutes les applis : https://lechampdelaurore-boop.github.io/
 
 Les progrès restent dans le navigateur de l'appareil : aucun compte, et rien n'est envoyé sur internet.
 

@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#0F1430" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tables">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -80,6 +81,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 /* En-tête */
 .head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .head h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1; margin: 0; text-wrap: balance; }
+.home-link { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; margin-bottom: 10px; padding: 6px 14px; border: 3px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: 700 .95rem var(--display); text-decoration: none; }
 .head p { margin: 8px 0 0; color: var(--muted); font-weight: 700; max-width: 30ch; }
 .minis { position: relative; width: 108px; height: 92px; flex: none; }
 .mini {
@@ -329,6 +331,7 @@ body.playing .head { display: none; }
 <div class="wrap">
   <header class="head">
     <div>
+      <a class="home-link" href="/">🏠 Mes applis</a>
       <h1>Tables en cartes</h1>
       <p>Choisis tes tables, retourne les cartes, et regarde-les devenir acquises.</p>
     </div>
