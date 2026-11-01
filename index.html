@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tables en cartes</title>
 <meta name="description" content="Flashcards pour apprendre les tables de multiplication de 2 à 12.">
-<meta name="theme-color" content="#EAF0FF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1430" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFF4FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E1933" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tables">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,51 +20,59 @@
 @font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('fonts/fredoka-latin.woff2') format('woff2'); }
 @font-face { font-family: 'Nunito'; font-style: normal; font-weight: 200 1000; font-display: swap; src: url('fonts/nunito-latin.woff2') format('woff2'); }
 
-/* Layout: une colonne centrée, une grosse carte au milieu, boutons épais à pouce. */
+/* Layout: une colonne centrée, une grosse carte au milieu, boutons épais à pouce.
+   Couleurs et formes : charte commune des applis de Marc (une couleur = un rôle). */
 :root {
-  --bg: #EAF0FF;
+  --bg: #FFF4FA;
+  --bg2: #EEF4FF;
   --surface: #FFFFFF;
-  --ink: #16204A;
-  --muted: #55608A;
-  --line: #16204A;
-  --track: #D3DCF7;
-  --accent: #2F5BFF;
+  --surface2: #F4F1FF;
+  --ink: #2B2340;
+  --muted: #6B6190;
+  --line: #2B2340;
+  --track: #E4DEF7;
+  --accent: #3B5BFF;
   --on-accent: #FFFFFF;
-  --sun: #FFC93C;
-  --on-sun: #16204A;
+  --sun: #FFD45C;
+  --on-sun: #2B2340;
   --good: #2BC48A;
-  --on-good: #06291C;
-  --bad: #FF7A6B;
-  --on-bad: #3A0C07;
+  --on-good: #0B2E20;
+  --bad: #FFB38A;
+  --on-bad: #2B2340;
   --tint-good: #D8F6E8;
-  --tint-bad: #FFE1DC;
+  --tint-bad: #FFE4D6;
   --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
   --body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0F1430;
-    --surface: #1B2250;
-    --ink: #EEF1FF;
-    --muted: #A5AFD9;
-    --line: #EEF1FF;
-    --track: #2A3370;
-    --accent: #8AA2FF;
-    --on-accent: #0E1230;
+    --bg: #1E1933;
+    --bg2: #171B36;
+    --surface: #2B2448;
+    --surface2: #352D57;
+    --ink: #FBEFFF;
+    --muted: #C3B7E8;
+    --line: #120E22;
+    --track: #3D3466;
+    --accent: #7F98FF;
+    --on-accent: #120E22;
     --good: #3DDC97;
-    --bad: #FF8A7E;
-    --tint-good: #1B4A3B;
-    --tint-bad: #58262A;
+    --bad: #FF9F7A;
+    --on-bad: #2A120A;
+    --tint-good: #1D4A3D;
+    --tint-bad: #5A3326;
     color-scheme: dark;
   }
 }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+html { background: var(--bg2); }
 body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100vh;
+  background: linear-gradient(170deg, var(--bg) 0%, var(--bg2) 100%) no-repeat;
   color: var(--ink);
   font-family: var(--body);
   font-size: 17px;
@@ -81,8 +89,13 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 
 /* En-tête */
 .head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.head .titles { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .head h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 9vw, 2.8rem); line-height: 1; margin: 0; text-wrap: balance; }
-.home-link { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; margin-bottom: 10px; padding: 6px 14px; border: 3px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: 700 .95rem var(--display); text-decoration: none; }
+.home-link {
+  flex: none; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; text-decoration: none;
+  background: var(--surface); border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line); -webkit-tap-highlight-color: transparent;
+}
+.home-link:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
 .head p { margin: 8px 0 0; color: var(--muted); font-weight: 700; max-width: 30ch; }
 .minis { position: relative; width: 108px; height: 92px; flex: none; }
 .mini {
@@ -94,7 +107,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .mini.m2 { right: 0; top: 0; transform: rotate(7deg); background: var(--sun); color: var(--on-sun); font-size: 1.7rem; }
 
 /* Panneaux */
-.panel { background: var(--surface); border: 3px solid var(--line); border-radius: 22px; box-shadow: 0 6px 0 var(--line); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.panel { background: var(--surface); border: 3px solid var(--line); border-radius: 28px; box-shadow: 0 6px 0 var(--line); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 .panel h2 { font-family: var(--display); font-weight: 600; font-size: 1.25rem; margin: 0; }
 .hint { color: var(--muted); font-weight: 700; font-size: 0.9rem; margin: 0; }
 .center { text-align: center; }
@@ -102,7 +115,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 10px; }
 .chip {
   display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 9px;
-  background: var(--bg); border: 3px solid var(--line); border-radius: 16px; cursor: pointer;
+  background: var(--surface2); border: 3px solid var(--line); border-radius: 18px; cursor: pointer;
   box-shadow: 0 4px 0 var(--line); transition: transform .08s, box-shadow .08s, background .15s;
 }
 .chip .n { font-family: var(--display); font-weight: 700; font-size: 1.7rem; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -121,7 +134,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg span {
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; min-height: 56px; padding: 8px 10px; font-weight: 800; line-height: 1.2;
-  background: var(--bg); border: 3px solid var(--line); border-radius: 16px;
+  background: var(--surface2); border: 3px solid var(--line); border-radius: 18px;
 }
 .seg small { font-family: var(--display); font-weight: 500; font-size: .95rem; margin-top: 3px; white-space: nowrap; }
 .seg input:checked + span { background: var(--sun); color: var(--on-sun); box-shadow: 0 4px 0 var(--line); }
@@ -129,11 +142,20 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 
 .switches { display: flex; flex-direction: column; gap: 12px; }
 .switch { display: flex; align-items: center; gap: 12px; font-weight: 700; cursor: pointer; }
-.switch input { width: 26px; height: 26px; accent-color: var(--accent); flex: none; margin: 0; }
+.switch input {
+  appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 58px; height: 34px; margin: 0; cursor: pointer;
+  border: 3px solid var(--line); border-radius: 999px; background: var(--track); transition: background .2s;
+}
+.switch input::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--line); transition: transform .2s cubic-bezier(.3, 1.6, .5, 1);
+}
+.switch input:checked { background: var(--good); }
+.switch input:checked::after { transform: translateX(24px); }
 
 /* Boutons */
 .btn {
-  border: 3px solid var(--line); border-radius: 18px; padding: 14px 20px; min-height: 58px;
+  border: 3px solid var(--line); border-radius: 22px; padding: 14px 20px; min-height: 58px;
   font-family: var(--display); font-weight: 600; font-size: 1.2rem; cursor: pointer;
   box-shadow: 0 5px 0 var(--line); transition: transform .08s, box-shadow .08s;
   background: var(--surface); color: var(--ink);
@@ -164,7 +186,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .card.flipped { transform: rotateY(180deg); }
 .face {
   grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  background: var(--surface); border: 3px solid var(--line); border-radius: 26px; box-shadow: 0 7px 0 var(--line);
+  background: var(--surface); border: 3px solid var(--line); border-radius: 28px; box-shadow: 0 7px 0 var(--line);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px 18px; text-align: center;
 }
 #play.typing .face { padding-block: 16px; }
@@ -182,8 +204,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .tip b { font-weight: 800; }
 
 .feedback { min-height: 1.6em; text-align: center; font-weight: 800; font-size: 1.1rem; }
-.feedback.ok { color: var(--good); }
-.feedback.ko { color: var(--bad); }
+.feedback.ok, .feedback.ko { color: var(--ink); }
 .actions { display: flex; gap: 12px; }
 .actions .btn { flex: 1; }
 
@@ -197,11 +218,11 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .key {
   min-height: 58px; display: grid; place-items: center; cursor: pointer;
-  background: var(--surface); color: var(--ink); border: 3px solid var(--line); border-radius: 16px; box-shadow: 0 4px 0 var(--line);
+  background: var(--surface); color: var(--ink); border: 3px solid var(--line); border-radius: 18px; box-shadow: 0 4px 0 var(--line);
   font-family: var(--display); font-weight: 600; font-size: 1.6rem; transition: transform .06s, box-shadow .06s;
 }
 .key:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
-.key.del { background: var(--bg); }
+.key.del { background: var(--surface2); }
 .key.ok { background: var(--good); color: var(--on-good); }
 .key svg { width: 30px; height: 30px; }
 .pad.locked .key { opacity: .45; pointer-events: none; }
@@ -255,7 +276,7 @@ body.playing .head { display: none; }
 
 /* Cartes difficiles */
 .hardlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.hardlist li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 14px; border: 3px solid var(--line); border-radius: 14px; background: var(--bg); }
+.hardlist li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 14px; border: 3px solid var(--line); border-radius: 14px; background: var(--surface2); }
 .hardlist .eq { flex: 1 1 auto; font-family: var(--display); font-weight: 600; font-size: 1.25rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .hardlist .miss { color: var(--muted); font-weight: 700; font-size: .9rem; white-space: nowrap; }
 .pill { font-weight: 800; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; white-space: nowrap; color: var(--ink); }
@@ -275,13 +296,13 @@ body.playing .head { display: none; }
 @keyframes bump { from { transform: scale(.6); opacity: 0; } }
 .burst { position: fixed; width: 0; height: 0; pointer-events: none; z-index: 40; }
 .burst i, .burst b { position: absolute; left: 0; top: 0; font-style: normal; line-height: 1; }
-.burst i { font-size: var(--s); color: var(--c); -webkit-text-stroke: 1.5px #16204A; animation: burst .8s cubic-bezier(.2, .8, .3, 1) forwards; }
+.burst i { font-size: var(--s); color: var(--c); -webkit-text-stroke: 1.5px #2B2340; animation: burst .8s cubic-bezier(.2, .8, .3, 1) forwards; }
 @keyframes burst {
   from { transform: translate(-50%, -50%) scale(.3); opacity: 1; }
   70% { opacity: 1; }
   to { transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) rotate(var(--r)); opacity: 0; }
 }
-.burst b { font-family: var(--display); font-weight: 700; font-size: 2rem; color: var(--good); -webkit-text-stroke: 1.5px #16204A; animation: plus .9s ease-out forwards; }
+.burst b { font-family: var(--display); font-weight: 700; font-size: 2rem; color: var(--good); -webkit-text-stroke: 1.5px #2B2340; animation: plus .9s ease-out forwards; }
 @keyframes plus {
   from { transform: translate(-50%, -20%) scale(.5); opacity: 0; }
   25% { transform: translate(-50%, -80%) scale(1.15); opacity: 1; }
@@ -309,12 +330,12 @@ body.playing .head { display: none; }
 @keyframes hop { 30% { transform: translateY(-14px) rotate(-6deg); } 60% { transform: rotate(4deg); } }
 .bubble {
   position: absolute; right: 86px; bottom: 84px; padding: 6px 12px; white-space: nowrap;
-  background: #FFFFFF; color: #16204A; border: 3px solid #16204A; border-radius: 16px; box-shadow: 0 4px 0 #16204A;
+  background: #FFFFFF; color: #2B2340; border: 3px solid #2B2340; border-radius: 16px; box-shadow: 0 4px 0 #2B2340;
   font-family: var(--display); font-weight: 700; font-size: 1.1rem;
 }
 .bubble::after {
   content: ''; position: absolute; right: -9px; bottom: 6px; width: 12px; height: 12px;
-  background: #FFFFFF; border: solid #16204A; border-width: 3px 3px 0 0; transform: rotate(45deg);
+  background: #FFFFFF; border: solid #2B2340; border-width: 3px 3px 0 0; transform: rotate(45deg);
 }
 
 @media (max-width: 400px) {
@@ -322,7 +343,7 @@ body.playing .head { display: none; }
   .actions .btn { font-size: 1.05rem; padding-inline: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .card, .meter i, .chip, .btn, .key { transition: none; }
+  .card, .meter i, .chip, .btn, .key, .switch input, .switch input::after { transition: none; }
   .scene.pop, .scene.shake, .feedback.ok, .feedback.ko, .buddy svg { animation: none !important; }
   .buddy { transition: opacity .2s; transform: none; }
 }
@@ -332,8 +353,10 @@ body.playing .head { display: none; }
 <div class="wrap">
   <header class="head">
     <div>
-      <a class="home-link" href="/">🏠 Mes applis</a>
-      <h1>Tables en cartes</h1>
+      <div class="titles">
+        <a class="home-link" href="/" aria-label="Mes applis" title="Mes applis">🏠</a>
+        <h1>Tables en cartes</h1>
+      </div>
       <p>Choisis tes tables, retourne les cartes, et regarde-les devenir acquises.</p>
     </div>
     <div class="minis" aria-hidden="true"><div class="mini m1">6 × 7</div><div class="mini m2">42</div></div>
@@ -377,7 +400,7 @@ body.playing .head { display: none; }
         </div>
       </div>
 
-      <button class="btn sun big" type="button" id="startBtn">C'est parti !</button>
+      <button class="btn primary big" type="button" id="startBtn">C'est parti !</button>
       <p class="hint center" id="deckInfo"></p>
       <div class="foot"><a class="link" href="imprimer.html">Cartes à imprimer</a><button class="link" type="button" id="resetBtn">Effacer mes progrès</button></div>
     </section>
@@ -454,7 +477,7 @@ body.playing .head { display: none; }
         <ul class="misses" id="misses"></ul>
       </div>
       <button class="btn primary big" type="button" id="againMiss">Revoir les cartes ratées</button>
-      <button class="btn sun big" type="button" id="againAll">Rejouer une partie</button>
+      <button class="btn big" type="button" id="againAll">Rejouer une partie</button>
       <button class="btn big" type="button" id="backBtn">Changer de tables</button>
     </section>
   </main>
@@ -1343,7 +1366,7 @@ body.playing .head { display: none; }
 
     var html = '';
     if (S.phase === 'ready') {
-      html = '<button class="btn sun big" type="button" data-act="go">Lancer le chrono (1 min)</button>';
+      html = '<button class="btn primary big" type="button" data-act="go">Lancer le chrono (1 min)</button>';
     } else if (!typing) {
       html = S.phase === 'ask'
         ? '<button class="btn primary big" type="button" data-act="reveal">Montrer la réponse</button>'
