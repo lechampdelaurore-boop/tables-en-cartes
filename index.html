@@ -203,6 +203,43 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .key svg { width: 30px; height: 30px; }
 .pad.locked .key { opacity: .45; pointer-events: none; }
 
+/* Mode « je tape » : l'écran de jeu tient pile dans la hauteur du téléphone.
+   La carte prend la place restante ; le pavé garde sa place quand il disparaît
+   (le bouton « Carte suivante » vient s'y poser), pour que rien ne saute. */
+body.playing { padding-top: calc(12px + env(safe-area-inset-top, 0px)); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+body.playing .head { display: none; }
+#play.typing {
+  --pads: calc(24px + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px));
+  height: calc(100vh - var(--pads));
+  height: calc(100dvh - var(--pads));
+  max-height: 860px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 12px;
+}
+#play.typing .scene { min-height: 0; padding-bottom: 7px; display: flex; flex-direction: column; }
+#play.typing .card { flex: 1; min-height: 140px; }
+#play.typing .feedback { min-height: 2.7em; display: grid; place-items: center; font-size: 1.05rem; line-height: 1.35; }
+#play.typing .bottom { display: grid; }
+#play.typing .bottom > * { grid-area: 1 / 1; }
+#play.typing .actions { align-self: start; }
+.pad.away { visibility: hidden; }
+#play.typing .face.back { gap: 6px; }
+#play.typing .a { font-size: clamp(2.8rem, min(19vw, 10dvh), 6rem); }
+#play.typing .q { font-size: clamp(2.4rem, min(17vw, 10dvh), 5.4rem); }
+#play.typing .q.long { font-size: clamp(2rem, min(11.5vw, 8dvh), 4rem); }
+#play.typing .q.small { font-size: clamp(1.3rem, min(6.5vw, 4.5dvh), 2.1rem); }
+#play.typing .tip { font-size: .9rem; padding: 6px 12px; margin-top: 2px; }
+@media (max-height: 760px) {
+  #play.typing { gap: 10px; }
+  .pad { gap: 8px; }
+  .keys { gap: 8px; }
+  .answer { min-height: 54px; font-size: 2rem; }
+  .key { min-height: 50px; }
+}
+@media (max-height: 620px) {
+  .answer { min-height: 46px; }
+  .key { min-height: 44px; font-size: 1.45rem; }
+}
+
 /* Bilan */
 .stars { display: flex; justify-content: center; gap: 8px; font-size: 3.4rem; line-height: 1; }
 .stars span { color: var(--track); }
@@ -377,6 +414,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
         </div>
       </div>
       <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+      <div class="bottom">
       <div class="pad" id="pad" hidden>
         <div class="answer empty" id="answer" aria-live="polite" aria-label="Ta réponse">?</div>
         <div class="keys">
@@ -397,6 +435,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
         </div>
       </div>
       <div class="actions" id="actions"></div>
+      </div>
     </section>
 
     <!-- Bilan -->
@@ -689,6 +728,7 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
   var views = { setup: $('#setup'), hard: $('#hard'), play: $('#play'), done: $('#done') };
   function show(name) {
     Object.keys(views).forEach(function (k) { views[k].hidden = (k !== name); });
+    document.body.classList.toggle('playing', name === 'play');
     window.scrollTo(0, 0);
   }
 
@@ -890,7 +930,8 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
   function renderActions() {
     var typing = prefs.mode === 'type';
     views.play.classList.toggle('typing', typing && S.phase !== 'ready');
-    pad.hidden = !(typing && (S.phase === 'ask' || S.autoNext));
+    pad.hidden = !typing || S.phase === 'ready';
+    pad.classList.toggle('away', S.phase === 'revealed' && !S.autoNext);
     pad.classList.toggle('locked', S.phase !== 'ask');
 
     var html = '';
