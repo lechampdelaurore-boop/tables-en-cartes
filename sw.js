@@ -1,6 +1,6 @@
 // Garde le jeu disponible hors ligne.
 // Changer CACHE à chaque mise à jour des fichiers listés ci-dessous.
-var CACHE = 'tables-en-cartes-v8';
+var CACHE = 'tables-en-cartes-v9';
 var FILES = [
   './',
   './index.html',
