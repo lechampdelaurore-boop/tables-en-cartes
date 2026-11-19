@@ -19,7 +19,7 @@ Flashcards pour apprendre les tables de multiplication de 2 à 12.
 - S'installe sur l'écran d'accueil d'un téléphone ou d'une tablette et fonctionne hors ligne.
 - Le bouton « 🏠 Mes applis » ramène à la page d'accueil de toutes les applis : https://lechampdelaurore-boop.github.io/
 
-Les progrès restent dans le navigateur de l'appareil : aucun compte, et rien n'est envoyé sur internet.
+Les progrès restent dans le navigateur de l'appareil : aucun compte, et rien sur les progrès n'est envoyé sur internet. Seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de l'appli : pas de cookie, pas de nom.
 
 ## Cartes à imprimer
 
